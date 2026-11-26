@@ -3913,6 +3913,39 @@ updateTime(); setInterval(updateTime, 1000);
   scheduleNextLisbon();
 })();
 
+/* ── ALTURAS: hero-id -15% → zonas-panel +15% ──
+   O .hero-id ocupa o espaço que sobra (1fr) e o .zonas-panel a altura do conteúdo (auto).
+   Medimos a altura natural de cada um e passamos 15% da altura do hero-id para o zonas-panel. */
+(function shiftHeroToZonas() {
+  const left  = document.querySelector('.left');
+  const zonas = document.querySelector('.zonas-panel');
+  const hero  = document.querySelector('.hero-id');
+  if (!left || !zonas || !hero) return;
+  const SHIFT = 0.15;
+  let busy = false;
+
+  function apply() {
+    if (busy) return;
+    busy = true;
+    zonas.style.height = '';
+    // Só no layout de 2 colunas (no layout móvel tudo empilha em auto)
+    const cols = getComputedStyle(left).gridTemplateColumns.split(' ').length;
+    if (cols >= 2) {
+      const heroH  = hero.getBoundingClientRect().height;   // altura natural do hero-id
+      const zonasH = zonas.getBoundingClientRect().height;  // altura natural do zonas-panel
+      if (heroH > 0) zonas.style.height = `${zonasH + heroH * SHIFT}px`;
+    }
+    busy = false;
+  }
+
+  apply();
+  window.addEventListener('resize', apply);
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(apply).observe(left);
+  // O conteúdo das zonas pode mudar quando os dados chegam
+  new MutationObserver(() => requestAnimationFrame(apply))
+    .observe(zonas, { childList: true, subtree: true, characterData: true });
+})();
+
 /* ── SYNC: prazo+details = altura do zonas-panel ── */
 (function syncRightHeights() {
   const zonas = document.querySelector('.zonas-panel');
