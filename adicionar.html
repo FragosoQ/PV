@@ -294,8 +294,6 @@ button:disabled { opacity: .5; cursor: progress; transform: none; }
 .recent-list li.new { animation: flash 1.6s ease; }
 @keyframes flash { from { background: rgba(0,255,135,0.15); } to { background: transparent; } }
 
-.token-field[hidden] { display: none; }
-
 /* Hover só em dispositivos com rato (no tablet o hover "fica preso" depois do toque) */
 @media (hover: hover) {
   .h-back:hover { color: #fff; }
@@ -337,7 +335,7 @@ button:disabled { opacity: .5; cursor: progress; transform: none; }
 <header>
   <img src="https://res.cloudinary.com/djxxk3ipz/image/upload/v1776687956/somengil_logo_white_wzwrm0.png" alt="Somengil">
   <span class="h-title">Novo Objetivo</span>
-  <a class="h-back" href="index.html">← Painel</a>
+  <!--<a class="h-back" href="index.html">← Painel</a>-->
 </header>
 
 <main>
@@ -393,10 +391,6 @@ button:disabled { opacity: .5; cursor: progress; transform: none; }
         </div>
       </div>
 
-      <div class="field full token-field" id="tokenField" hidden>
-        <label class="label" for="token">Código de acesso</label>
-        <input type="password" id="token" autocomplete="current-password" placeholder="Pedido apenas uma vez neste browser">
-      </div>
     </div>
 
     <div class="actions">
@@ -424,7 +418,6 @@ button:disabled { opacity: .5; cursor: progress; transform: none; }
 // URL da Aplicação Web do apps-script/objetivos-writer.gs (termina em /exec)
 const WRITER_URL = 'https://script.google.com/macros/s/AKfycby1p6JwXlQhWjaPkx0y11TFU-HUQqz8A4imu20oMW2Zjeq1PBkogYbCSWxs-TinSKzt/exec';
 const SHEET = { id: '1VAbosk2nuuzkSqgP5DTS0M3PBnV-Oep0XRGY-aOxjMo', gid: 0 };
-const TOKEN_KEY = 'objetivosWriterToken';
 
 const $ = id => document.getElementById(id);
 const form = $('form'), msg = $('msg'), btn = $('submit');
@@ -644,7 +637,6 @@ form.addEventListener('keydown', ev => {
 });
 
 /* ── Envio ── */
-function getToken() { return localStorage.getItem(TOKEN_KEY) || $('token').value.trim(); }
 
 form.addEventListener('submit', async (ev) => {
   ev.preventDefault();
@@ -660,12 +652,8 @@ form.addEventListener('submit', async (ev) => {
   const pedido = $('pedido').value, prevista = $('prevista').value;
   if (pedido && prevista && prevista < pedido) { $('prevista').focus(); setMsg('Data prevista antes do pedido', 'err'); return; }
 
-  const token = getToken();
-  if (!token) { $('tokenField').hidden = false; $('token').focus(); setMsg('Indica o código de acesso', 'err'); return; }
-
   const checked = form.querySelector('input[name=status]:checked');
   const data = {
-    token,
     action: editing ? 'update' : 'add',
     id: editing ? editing.id : idSt.v,
     newId: editing ? idSt.v : undefined,
@@ -681,12 +669,9 @@ form.addEventListener('submit', async (ev) => {
     const res = await fetch(WRITER_URL, { method: 'POST', body: JSON.stringify(data) });
     const out = await res.json();
     if (!out.ok) {
-      if (out.auth) { localStorage.removeItem(TOKEN_KEY); $('tokenField').hidden = false; $('token').value = ''; $('token').focus(); }
       setMsg(out.error || 'Erro ao guardar', 'err');
       return;
     }
-    localStorage.setItem(TOKEN_KEY, token);
-    $('tokenField').hidden = true;
     highlight = fmtId(out.id);
     if (highlight !== idSt.v) {
       // Script antigo (sem suporte a ID escolhido): avisa em vez de falhar em silêncio
@@ -709,7 +694,6 @@ function today() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-$('tokenField').hidden = !!localStorage.getItem(TOKEN_KEY);
 buildChips('objChips', 'objetivo', OBJETIVOS);
 buildChips('modChips', 'modelo', MODELOS);
 fillPaises('');

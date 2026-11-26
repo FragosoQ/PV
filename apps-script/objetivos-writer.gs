@@ -6,21 +6,18 @@
  *
  * INSTALAÇÃO (uma vez, com uma conta que tenha permissão de edição na Sheet):
  *   1. https://script.google.com → Novo projeto → colar este ficheiro em Code.gs
- *   2. Definições do projeto (⚙) → Propriedades do script → adicionar
- *        WRITE_TOKEN = <uma palavra-passe à tua escolha>
- *   3. Implementar → Nova implementação → Tipo: Aplicação Web
+ *   2. Implementar → Nova implementação → Tipo: Aplicação Web
  *        Executar como:      Eu
  *        Quem tem acesso:    Qualquer pessoa
- *   4. Autorizar o acesso às Sheets quando pedido
- *   5. Copiar o URL que termina em /exec e colar em WRITER_URL no adicionar.html
+ *   3. Autorizar o acesso às Sheets quando pedido
+ *   4. Copiar o URL que termina em /exec e colar em WRITER_URL no adicionar.html
  *
- * O token é pedido uma vez na página e guardado só nesse browser — não fica no código.
  * Teste: <URL>/exec  → devolve { ok: true, nextId: "00xx", rows: [...] }
  *
  * Depois de alterar este ficheiro: Implementar → Gerir implementações → editar (lápis)
  * → Versão: "Nova versão" → Implementar. Assim o URL /exec mantém-se.
  *
- * POST { token, action: "add" | "update", id, newId (opcional), objetivo, pedido, prevista,
+ * POST { action: "add" | "update", id, newId (opcional), objetivo, pedido, prevista,
  *        quem, pais, status, modelo, evolucao }
  *   add:    id opcional — se vier, é usado (tem de estar livre); senão usa o próximo livre
  *   update: id = registo a alterar; newId opcional para mudar o ID (tem de estar livre)
@@ -63,11 +60,6 @@ function doPost(e) {
     data = JSON.parse((e && e.postData && e.postData.contents) || '{}');
   } catch (err) {
     return json_({ ok: false, error: 'Pedido inválido.' });
-  }
-
-  const token = PropertiesService.getScriptProperties().getProperty('WRITE_TOKEN');
-  if (!token || data.token !== token) {
-    return json_({ ok: false, error: 'Código de acesso inválido.', auth: true });
   }
 
   const str = v => String(v == null ? '' : v).trim().slice(0, MAX_LEN);
