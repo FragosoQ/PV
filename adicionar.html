@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#03060d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SOMENGIL · Novo Objetivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cyan:  #00d4ff;
+  --green: #00ff87;
+  --amber: #ffaa00;
+  --red:   #ff3b3b;
+  --line:  rgba(255,255,255,0.12);
+  --muted: rgba(255,255,255,0.6);
+  --side-pad: clamp(20px, 3vw, 48px);
+}
+
+html, body {
+  min-height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fundo numa camada fixa (o background-attachment: fixed não funciona bem em iPad) */
+.bg-grid {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+    radial-gradient(circle at center, rgba(81,184,234,1) 0%, rgba(0,0,0,1) 100%);
+  background-size: 48px 48px, 48px 48px, 100% 100%;
+}
+
+/* Toque: sem atraso de duplo-toque nem zoom acidental */
+a, button, label, input, li[tabindex] { touch-action: manipulation; }
+
+/* HEADER — igual ao index.html */
+header {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  height: calc(clamp(52px, 6vh, 70px) + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) calc(var(--side-pad) + env(safe-area-inset-right)) 0 calc(var(--side-pad) + env(safe-area-inset-left));
+  background: rgba(0,20,40,0.35);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+header img { height: clamp(26px, 4vh, 36px); display: block; }
+.h-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(20px, 2.6vh, 28px); letter-spacing: 5px;
+  text-shadow: 0 0 20px rgba(255,255,255,0.4);
+}
+.h-back {
+  color: rgba(255,255,255,0.75); text-decoration: none;
+  font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 4px;
+}
+
+main {
+  position: relative; z-index: 1;
+  max-width: 880px; margin: 0 auto;
+  padding: clamp(24px, 5vh, 56px) calc(var(--side-pad) + env(safe-area-inset-right))
+           calc(48px + env(safe-area-inset-bottom)) calc(var(--side-pad) + env(safe-area-inset-left));
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0,15,40,0.35);
+  backdrop-filter: blur(10px);
+  padding: clamp(20px, 3vw, 36px);
+}
+
+/* Cabeçalho do formulário: ID + Evolução */
+.top {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 20px;
+  padding-bottom: 20px; margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.label {
+  display: block;
+  font-size: 13px; font-weight: 700; letter-spacing: 4px;
+  text-transform: uppercase; color: rgba(255,255,255,0.7);
+  margin-bottom: 8px;
+}
+.big-id {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 8vh, 76px); line-height: .85; letter-spacing: 2px;
+  color: rgba(255,255,255,0.9);
+}
+.big-id { display: flex; align-items: baseline; }
+.big-id small { font-size: .45em; color: var(--muted); letter-spacing: 3px; margin-left: 10px; white-space: nowrap; }
+.big-id small.warn { color: var(--red); }
+.big-id small.changed { color: var(--amber); }
+/* ID editável: parece texto grande, com um traço discreto a indicar que se pode tocar */
+.id-input {
+  font: inherit; letter-spacing: inherit; color: inherit;
+  width: 4.2ch; min-height: 0; padding: 0;
+  background: transparent; border: 0; border-bottom: 2px dashed rgba(255,255,255,0.25); border-radius: 0;
+  outline: none; -webkit-appearance: none; appearance: none;
+}
+.id-input:focus { border-bottom: 2px solid var(--cyan); }
+.id-input.warn { border-bottom-color: var(--red); color: #ff8080; }
+
+.evo { text-align: right; min-width: 200px; }
+.evo-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 8vh, 76px); line-height: .85;
+  transition: color .2s, text-shadow .2s;
+}
+/* O input tem 44px de altura (área de toque); a barra de 10px é desenhada no fundo */
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 44px; margin-top: 6px;
+  background:
+    linear-gradient(var(--evo-c, var(--green)), var(--evo-c, var(--green))) left center / var(--evo-p, 0%) 10px no-repeat,
+    linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)) left center / 100% 10px no-repeat;
+  border-radius: 999px;
+  outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-runnable-track { height: 44px; background: transparent; }
+input[type=range]::-moz-range-track { height: 10px; background: transparent; }
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 28px; height: 28px; margin-top: 8px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 12px var(--evo-c, var(--green));
+}
+input[type=range]::-moz-range-thumb {
+  width: 28px; height: 28px; border: 0; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 12px var(--evo-c, var(--green));
+}
+input[type=range]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+/* Campos */
+.grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 28px;
+}
+.full { grid-column: 1 / -1; }
+
+.field input[type=text],
+.field input[type=date],
+.field input[type=password] {
+  width: 100%;
+  font: inherit; font-size: 20px; font-weight: 400; letter-spacing: .5px;
+  color: #fff;
+  background: transparent;
+  border: 0; border-bottom: 1px solid rgba(255,255,255,0.25); border-radius: 0;
+  min-height: 48px;
+  padding: 8px 0;
+  outline: none;
+  transition: border-color .2s;
+  color-scheme: dark;
+  -webkit-appearance: none; appearance: none;
+}
+/* iPad: o input de data vazio colapsa e alinha ao centro */
+.field input[type=date] { display: block; text-align: left; }
+.field input[type=date]::-webkit-date-and-time-value { text-align: left; }
+.field input::placeholder { color: rgba(255,255,255,0.3); }
+.field input:focus { border-bottom-color: var(--cyan); }
+.field input:user-invalid { border-bottom-color: var(--red); }
+
+/* Status — pills com as mesmas cores do card Planeamento */
+.status { display: flex; flex-wrap: wrap; gap: 12px; }
+.status input { position: absolute; opacity: 0; pointer-events: none; }
+.status label {
+  font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  display: inline-flex; align-items: center; min-height: 48px;
+  padding: 0 20px; border-radius: 8px; cursor: pointer; user-select: none;
+  border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5);
+  transition: all .2s;
+}
+.status input:focus-visible + label { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.status input:checked + label.st-analise  { border-color: rgba(170,170,170,0.6); color: #b0b0b0; background: rgba(170,170,170,0.08); }
+.status input:checked + label.st-agendado { border-color: rgba(0,150,255,0.6);   color: #3aa0ff; background: rgba(0,150,255,0.08); }
+.status input:checked + label.st-curso    { border-color: rgba(255,210,0,0.6);   color: #ffd400; background: rgba(255,210,0,0.08); }
+.status input:checked + label.st-final    { border-color: rgba(0,255,135,0.45);  color: #00ff87; background: rgba(0,255,135,0.08); }
+
+/* Objetivo / Modelo — escolha por toque (cor neutra cyan quando selecionado) */
+.chips { display: flex; flex-wrap: wrap; gap: 12px; }
+.chips input { position: absolute; opacity: 0; pointer-events: none; }
+.chips label {
+  font-size: 17px; font-weight: 600; letter-spacing: 1px;
+  display: inline-flex; align-items: center; min-height: 48px;
+  padding: 0 18px; border-radius: 8px; cursor: pointer; user-select: none;
+  border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6);
+  transition: all .2s;
+}
+#modChips label { font-family: 'Bebas Neue', sans-serif; font-size: 21px; letter-spacing: 2px; min-width: 76px; justify-content: center; }
+.chips input:focus-visible + label { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.chips input:checked + label {
+  border-color: rgba(0,212,255,0.7); color: #fff;
+  background: rgba(0,212,255,0.12); box-shadow: 0 0 14px rgba(0,212,255,0.25);
+}
+.chips label.extra { border-style: dashed; }
+
+/* País — select com o mesmo traço dos campos */
+.field select {
+  width: 100%; min-height: 48px;
+  font: inherit; font-size: 20px; color: #fff;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='white' stroke-opacity='.6' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 4px center;
+  border: 0; border-bottom: 1px solid rgba(255,255,255,0.25); border-radius: 0;
+  padding: 8px 28px 8px 0; outline: none; cursor: pointer;
+  -webkit-appearance: none; appearance: none; color-scheme: dark;
+}
+.field select:focus { border-bottom-color: var(--cyan); }
+.field select.is-empty { color: rgba(255,255,255,0.35); }
+.field select option, .field select optgroup { background: #07121f; color: #fff; }
+
+/* Ações */
+.actions {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  margin-top: 30px; padding-top: 22px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.msg { font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase; min-height: 1.2em; }
+.msg.ok  { color: var(--green); }
+.msg.err { color: var(--red); }
+
+button {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 4px;
+  color: #03060d; background: var(--green);
+  border: 0; border-radius: 999px;
+  min-height: 52px; padding: 0 36px; cursor: pointer;
+  box-shadow: 0 0 18px rgba(0,255,135,0.45);
+  transition: transform .15s, box-shadow .2s, opacity .2s;
+}
+button:active { transform: scale(.97); }
+button:disabled { opacity: .5; cursor: progress; transform: none; }
+
+/* Modo edição */
+.mode-tag {
+  display: inline-block; margin-left: 10px; vertical-align: middle;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--amber); border: 1px solid rgba(255,170,0,0.5); border-radius: 4px; padding: 1px 8px;
+}
+.mode-tag[hidden] { display: none; }
+.panel.editing { border-color: rgba(255,170,0,0.45); box-shadow: 0 0 0 1px rgba(255,170,0,0.15), 0 0 30px rgba(255,170,0,0.08); }
+.btn-ghost {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(255,255,255,0.75); background: transparent;
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 999px;
+  padding: 0 24px; box-shadow: none;
+}
+.btn-ghost[hidden] { display: none; }
+.btns { display: flex; gap: 12px; align-items: center; }
+
+/* Registos */
+.recent { margin-top: 28px; }
+.recent-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.recent-head .label { margin-bottom: 0; }
+.search {
+  width: min(280px, 55%);
+  font: inherit; font-size: 18px; color: #fff;
+  background: transparent; border: 0; border-bottom: 1px solid rgba(255,255,255,0.25); border-radius: 0;
+  min-height: 44px; padding: 6px 0; outline: none;
+  -webkit-appearance: none; appearance: none;
+}
+.search:focus { border-bottom-color: var(--cyan); }
+.search::placeholder { color: rgba(255,255,255,0.3); }
+.recent-list {
+  list-style: none; margin-top: 10px; max-height: 460px; overflow-y: auto;
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+}
+.recent-list li {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+  min-height: 56px; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 18px; cursor: pointer; border-radius: 6px; user-select: none;
+  transition: background .15s;
+}
+.recent-list li:active { background: rgba(255,255,255,0.1); }
+.recent-list li:focus-visible { outline: 2px solid var(--cyan); outline-offset: -2px; }
+.recent-list li.sel { background: rgba(255,170,0,0.1); box-shadow: inset 2px 0 0 var(--amber); }
+.recent-list li.empty { cursor: default; }
+.recent-list li.empty:active { background: transparent; }
+.recent-list .rid { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; color: rgba(255,255,255,0.75); }
+.recent-list .robj { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-list .rst { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.recent-list .rst.st-analise  { color: #b0b0b0; }
+.recent-list .rst.st-agendado { color: #3aa0ff; }
+.recent-list .rst.st-curso    { color: #ffd400; }
+.recent-list .rst.st-final    { color: #00ff87; }
+.recent-list li.new { animation: flash 1.6s ease; }
+@keyframes flash { from { background: rgba(0,255,135,0.15); } to { background: transparent; } }
+
+.token-field[hidden] { display: none; }
+
+/* Hover só em dispositivos com rato (no tablet o hover "fica preso" depois do toque) */
+@media (hover: hover) {
+  .h-back:hover { color: #fff; }
+  .status label:hover, .chips label:hover { color: #fff; }
+  button:hover { transform: translateY(-1px); box-shadow: 0 0 26px rgba(0,255,135,0.65); }
+  .btn-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.5); box-shadow: none; }
+  .recent-list li:hover { background: rgba(255,255,255,0.06); }
+  .recent-list li.empty:hover { background: transparent; }
+}
+
+/* Tablet na horizontal / ecrãs largos: formulário e lista lado a lado */
+@media (min-width: 1000px) {
+  main {
+    max-width: 1320px;
+    display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 28px; align-items: start;
+  }
+  .recent {
+    margin-top: 0;
+    position: sticky; top: 20px;
+    display: flex; flex-direction: column;
+    max-height: calc(100dvh - clamp(52px, 6vh, 70px) - env(safe-area-inset-top) - 40px);
+  }
+  .recent-list { max-height: none; flex: 1; min-height: 0; }
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .top { flex-direction: column; align-items: stretch; }
+  .evo { text-align: left; }
+  .actions { flex-direction: column-reverse; align-items: stretch; }
+  .h-title { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<header>
+  <img src="https://res.cloudinary.com/djxxk3ipz/image/upload/v1776687956/somengil_logo_white_wzwrm0.png" alt="Somengil">
+  <span class="h-title">Novo Objetivo</span>
+  <a class="h-back" href="index.html">← Painel</a>
+</header>
+
+<main>
+  <form class="panel" id="form" novalidate>
+    <div class="top">
+      <div>
+        <label class="label" for="idInput">ID <span class="mode-tag" id="modeTag" hidden>A editar</span></label>
+        <div class="big-id"><span aria-hidden="true">#</span><input class="id-input" id="idInput" inputmode="numeric" autocomplete="off" maxlength="12" enterkeyhint="done" aria-describedby="idHint"><small id="idHint"></small></div>
+      </div>
+      <div class="evo">
+        <label class="label" for="evolucao">Evolução</label>
+        <div class="evo-num" id="evoNum">0%</div>
+        <input type="range" id="evolucao" name="evolucao" min="0" max="100" step="5" value="0">
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="field full">
+        <span class="label" id="lblObjetivo">Objetivo</span>
+        <div class="chips" id="objChips" role="radiogroup" aria-labelledby="lblObjetivo"></div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="pedido">Data Pedido</label>
+        <input type="date" id="pedido" name="pedido">
+      </div>
+      <div class="field">
+        <label class="label" for="prevista">Data Prevista</label>
+        <input type="date" id="prevista" name="prevista">
+      </div>
+
+      <div class="field">
+        <label class="label" for="quem">Pedido por</label>
+        <input type="text" id="quem" name="quem" list="dl-quem" maxlength="300" autocomplete="off" autocapitalize="words" enterkeyhint="done">
+      </div>
+      <div class="field">
+        <label class="label" for="pais">País</label>
+        <select id="pais" name="pais"></select>
+      </div>
+
+      <div class="field full">
+        <span class="label" id="lblModelo">Modelo</span>
+        <div class="chips" id="modChips" role="radiogroup" aria-labelledby="lblModelo"></div>
+      </div>
+
+      <div class="field full">
+        <span class="label">Status</span>
+        <div class="status" role="radiogroup" aria-label="Status">
+          <input type="radio" name="status" id="s1" value="Em análise" checked><label for="s1" class="st-analise">Em Análise</label>
+          <input type="radio" name="status" id="s2" value="Agendado"><label for="s2" class="st-agendado">Agendado</label>
+          <input type="radio" name="status" id="s3" value="Em curso"><label for="s3" class="st-curso">Em Curso</label>
+          <input type="radio" name="status" id="s4" value="Finalizado"><label for="s4" class="st-final">Finalizado</label>
+        </div>
+      </div>
+
+      <div class="field full token-field" id="tokenField" hidden>
+        <label class="label" for="token">Código de acesso</label>
+        <input type="password" id="token" autocomplete="current-password" placeholder="Pedido apenas uma vez neste browser">
+      </div>
+    </div>
+
+    <div class="actions">
+      <span class="msg" id="msg" role="status" aria-live="polite"></span>
+      <div class="btns">
+        <button type="button" class="btn-ghost" id="cancel" hidden>Novo</button>
+        <button type="submit" id="submit">Adicionar</button>
+      </div>
+    </div>
+  </form>
+
+  <section class="recent">
+    <div class="recent-head">
+      <span class="label">Registos · clica para editar</span>
+      <input type="search" class="search" id="search" placeholder="Procurar…" aria-label="Procurar registos" enterkeyhint="search">
+    </div>
+    <ul class="recent-list" id="recent"></ul>
+  </section>
+</main>
+
+<datalist id="dl-quem"></datalist>
+
+<script src="assets/data/paises-pt.js"></script>
+<script>
+// URL da Aplicação Web do apps-script/objetivos-writer.gs (termina em /exec)
+const WRITER_URL = 'https://script.google.com/macros/s/AKfycby1p6JwXlQhWjaPkx0y11TFU-HUQqz8A4imu20oMW2Zjeq1PBkogYbCSWxs-TinSKzt/exec';
+const SHEET = { id: '1VAbosk2nuuzkSqgP5DTS0M3PBnV-Oep0XRGY-aOxjMo', gid: 0 };
+const TOKEN_KEY = 'objetivosWriterToken';
+
+const $ = id => document.getElementById(id);
+const form = $('form'), msg = $('msg'), btn = $('submit');
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const OBJETIVOS = ['Análise Garantias', 'Material Testes', 'Live Demo', 'Máquina Feira - Preparação', 'Máquina Feira - Manutenção'];
+const MODELOS = ['MWS300', 'MWS500', 'MWS700', 'MWS715', 'MUS', 'MDC', 'MLU', 'MLB', 'MLH', 'MLT', 'OUTRO'];
+const PAISES = (window.PAISES_PT || []).map(p => p[0]);
+// Comparação tolerante: sem acentos, maiúsculas, hífens ou espaços a mais
+const norm = v => String(v == null ? '' : v).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+const fmtId = v => /^\d+(\.0+)?$/.test(String(v).trim()) ? String(parseInt(v, 10)).padStart(4, '0') : String(v).trim();
+
+function statusClass(s) {
+  s = String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  if (/analise/.test(s)) return 'st-analise';
+  if (/agendad/.test(s)) return 'st-agendado';
+  if (/curso/.test(s)) return 'st-curso';
+  if (/finaliz|conclu/.test(s)) return 'st-final';
+  return '';
+}
+
+function setMsg(text, kind) {
+  msg.textContent = text;
+  msg.className = 'msg' + (kind ? ' ' + kind : '');
+}
+
+/* ── Evolução: mesma escala de cor do painel ── */
+function evoColor(p) { return p >= 75 ? '#00ff87' : p >= 40 ? '#00d4ff' : '#ffaa00'; } // = ec() do index.html
+function updateEvo() {
+  const r = $('evolucao'), p = Number(r.value), c = evoColor(p);
+  $('evoNum').textContent = p + '%';
+  $('evoNum').style.color = c;
+  $('evoNum').style.textShadow = `0 0 30px ${c}55`;
+  r.style.setProperty('--evo-p', p + '%');
+  r.style.setProperty('--evo-c', c);
+}
+$('evolucao').addEventListener('input', updateEvo);
+
+/* ── Estado ── */
+let ROWS = [];          // registos lidos do script
+let NEXT_ID = '';
+let editing = null;     // registo em edição (ou null = novo)
+let highlight = null;
+
+/* ── Leitura (pelo script — dados frescos, sem cache do gviz) ── */
+async function loadRows() {
+  if (!WRITER_URL) { renderList('Falta configurar WRITER_URL'); return; }
+  try {
+    const out = await (await fetch(WRITER_URL, { cache: 'no-store' })).json();
+    if (!out.ok) throw new Error(out.error);
+    ROWS = out.rows.map(r => ({ ...r, id: fmtId(r.id) }));
+    NEXT_ID = out.nextId;
+    if (!editing) showId(); else checkId();
+    fillSuggestions();
+    renderList();
+  } catch (e) {
+    renderList('Não foi possível ler a Sheet');
+  }
+}
+
+function fillSuggestions() {
+  const vals = [...new Set(ROWS.map(r => String(r.quem || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+  $('dl-quem').innerHTML = vals.map(v => `<option value="${esc(v)}">`).join('');
+  fillPaises();
+}
+
+/* ── Objetivo / Modelo: chips de escolha única ── */
+function buildChips(boxId, name, options) {
+  $(boxId).innerHTML = options.map((v, i) =>
+    `<input type="radio" name="${name}" id="${name}${i}" value="${esc(v)}"><label for="${name}${i}">${esc(v)}</label>`).join('');
+}
+// Marca a opção correspondente; um valor antigo que não esteja na lista aparece como chip extra (tracejado)
+function setChoice(boxId, name, value) {
+  const box = $(boxId);
+  box.querySelectorAll('.extra-wrap').forEach(el => el.remove());
+  box.querySelectorAll('input').forEach(r => { r.checked = false; });
+  if (!value) return;
+  const hit = [...box.querySelectorAll('input')].find(r => norm(r.value) === norm(value));
+  if (hit) { hit.checked = true; return; }
+  const wrap = document.createElement('span');
+  wrap.className = 'extra-wrap'; wrap.style.display = 'contents';
+  wrap.innerHTML = `<input type="radio" name="${name}" id="${name}X" value="${esc(value)}" checked><label for="${name}X" class="extra" title="Valor atual na Sheet">${esc(value)}</label>`;
+  box.appendChild(wrap);
+}
+const getChoice = name => { const r = form.querySelector(`input[name=${name}]:checked`); return r ? r.value : ''; };
+
+/* ── País: já usados primeiro, depois todos ── */
+function fillPaises(current) {
+  const sel = $('pais');
+  const keep = current !== undefined ? current : sel.value;
+  const used = [...new Set(ROWS.map(r => String(r.pais || '').trim()).filter(Boolean))]
+    .map(v => PAISES.find(p => norm(p) === norm(v)) || v)
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .sort((a, b) => a.localeCompare(b, 'pt'));
+  const opt = v => `<option value="${esc(v)}">${esc(v)}</option>`;
+  sel.innerHTML = `<option value="">Selecionar país…</option>` +
+    (used.length ? `<optgroup label="Já usados">${used.map(opt).join('')}</optgroup>` : '') +
+    `<optgroup label="Todos os países">${PAISES.map(opt).join('')}</optgroup>`;
+  setPais(keep);
+}
+function setPais(value) {
+  const sel = $('pais');
+  const hit = [...sel.options].find(o => o.value && norm(o.value) === norm(value));
+  if (hit) sel.value = hit.value;
+  else if (value) { sel.insertAdjacentHTML('afterbegin', `<option value="${esc(value)}">${esc(value)}</option>`); sel.value = value; }
+  else sel.value = '';
+  sel.classList.toggle('is-empty', !sel.value);
+}
+$('pais').addEventListener('change', () => $('pais').classList.toggle('is-empty', !$('pais').value));
+
+function renderList(error) {
+  const ul = $('recent');
+  if (error) { ul.innerHTML = `<li class="empty"><span></span><span class="robj" style="color:var(--muted)">${esc(error)}</span><span></span></li>`; return; }
+  const q = $('search').value.trim().toLowerCase();
+  const list = ROWS.slice().reverse().filter(r => !q ||
+    [r.id, r.objetivo, r.quem, r.pais, r.status, r.modelo].some(v => String(v || '').toLowerCase().includes(q)));
+  ul.innerHTML = list.map(r => `
+    <li tabindex="0" data-id="${esc(r.id)}" class="${editing && editing.id === r.id ? 'sel' : ''} ${r.id === highlight ? 'new' : ''}">
+      <span class="rid">#${esc(r.id)}</span>
+      <span class="robj">${esc(r.objetivo)}</span>
+      <span class="rst ${statusClass(r.status)}">${esc(r.status || '—')}</span>
+    </li>`).join('') || `<li class="empty"><span></span><span class="robj" style="color:var(--muted)">${q ? 'Sem resultados' : 'Sem registos'}</span><span></span></li>`;
+}
+
+$('search').addEventListener('input', () => renderList());
+$('recent').addEventListener('click', ev => {
+  const li = ev.target.closest('li[data-id]');
+  if (li) startEdit(li.dataset.id);
+});
+$('recent').addEventListener('keydown', ev => {
+  const li = ev.target.closest('li[data-id]');
+  if (li && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); startEdit(li.dataset.id); }
+});
+
+/* ── Modo novo / edição ── */
+function showId() {
+  $('idInput').value = editing ? editing.id : (NEXT_ID || '');
+  checkId();
+}
+
+// Valida o ID escrito: formato e se já existe noutro registo
+const cleanId = v => fmtId(String(v || '').replace(/^#/, '').trim());
+function idState() {
+  const v = cleanId($('idInput').value);
+  if (!v) return { v, ok: false, text: 'obrigatório' };
+  if (!/^[A-Za-z0-9-]{1,12}$/.test(v) || /^0+$/.test(v)) return { v, ok: false, text: 'inválido' };
+  const taken = ROWS.some(r => norm(r.id) === norm(v) && !(editing && r.id === editing.id));
+  if (taken) return { v, ok: false, text: 'já existe' };
+  if (editing) return { v, ok: true, text: v === editing.id ? '' : 'novo ID', cls: v === editing.id ? '' : 'changed' };
+  return { v, ok: true, text: v === NEXT_ID ? 'próximo' : 'livre' };
+}
+function checkId() {
+  const st = idState(), hint = $('idHint');
+  hint.textContent = st.text;
+  hint.className = st.ok ? (st.cls || '') : 'warn';
+  $('idInput').classList.toggle('warn', !st.ok && st.v !== '');
+  return st;
+}
+$('idInput').addEventListener('input', checkId);
+$('idInput').addEventListener('blur', () => { if ($('idInput').value.trim()) $('idInput').value = cleanId($('idInput').value); checkId(); });
+$('idInput').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); ev.target.blur(); } });
+
+function setStatus(value) {
+  const cls = statusClass(value);
+  const radios = [...form.querySelectorAll('input[name=status]')];
+  radios.forEach(r => { r.checked = false; });
+  const match = radios.find(r => statusClass(r.value) === cls && cls);
+  if (match) match.checked = true;
+  else if (!editing) radios[0].checked = true;
+  // Em edição com status fora da lista: nenhum fica marcado e o script mantém o atual
+}
+
+function startEdit(id) {
+  const r = ROWS.find(x => x.id === id);
+  if (!r) return;
+  editing = r;
+  setChoice('objChips', 'objetivo', r.objetivo);
+  $('pedido').value = r.pedido || '';
+  $('prevista').value = r.prevista || '';
+  $('quem').value = r.quem || '';
+  setPais(r.pais);
+  setChoice('modChips', 'modelo', r.modelo);
+  $('evolucao').value = r.evolucao === '' || r.evolucao == null ? 0 : r.evolucao;
+  setStatus(r.status);
+  updateEvo();
+  showId();
+  $('modeTag').hidden = false;
+  $('cancel').hidden = false;
+  form.classList.add('editing');
+  btn.textContent = 'Guardar';
+  setMsg('');
+  renderList();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startNew() {
+  editing = null;
+  form.reset();
+  setChoice('objChips', 'objetivo', '');
+  setChoice('modChips', 'modelo', '');
+  setPais('');
+  $('pedido').value = today();
+  setStatus('Em análise');
+  updateEvo();
+  showId();
+  $('modeTag').hidden = true;
+  $('cancel').hidden = true;
+  form.classList.remove('editing');
+  btn.textContent = 'Adicionar';
+  renderList();
+}
+$('cancel').addEventListener('click', () => { startNew(); setMsg(''); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+// Enter no "Pedido por" fecha o teclado em vez de submeter
+form.addEventListener('keydown', ev => {
+  if (ev.key === 'Enter' && ev.target.id === 'quem') { ev.preventDefault(); ev.target.blur(); }
+});
+
+/* ── Envio ── */
+function getToken() { return localStorage.getItem(TOKEN_KEY) || $('token').value.trim(); }
+
+form.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  setMsg('');
+  if (btn.disabled) return; // evita gravar duas vezes com toques rápidos
+  if (!WRITER_URL) { setMsg('Falta configurar WRITER_URL', 'err'); return; }
+
+  const idSt = checkId();
+  if (!idSt.ok) { $('idInput').focus(); setMsg(`ID ${idSt.text}`, 'err'); return; }
+
+  const objetivo = getChoice('objetivo');
+  if (!objetivo) { $('objChips').scrollIntoView({ behavior: 'smooth', block: 'center' }); setMsg('Escolhe o objetivo', 'err'); return; }
+  const pedido = $('pedido').value, prevista = $('prevista').value;
+  if (pedido && prevista && prevista < pedido) { $('prevista').focus(); setMsg('Data prevista antes do pedido', 'err'); return; }
+
+  const token = getToken();
+  if (!token) { $('tokenField').hidden = false; $('token').focus(); setMsg('Indica o código de acesso', 'err'); return; }
+
+  const checked = form.querySelector('input[name=status]:checked');
+  const data = {
+    token,
+    action: editing ? 'update' : 'add',
+    id: editing ? editing.id : idSt.v,
+    newId: editing ? idSt.v : undefined,
+    objetivo, pedido, prevista,
+    quem: $('quem').value.trim(), pais: $('pais').value,
+    status: checked ? checked.value : '',
+    modelo: getChoice('modelo'), evolucao: $('evolucao').value,
+  };
+
+  btn.disabled = true; setMsg('A guardar…');
+  try {
+    // text/plain evita o preflight CORS do Apps Script
+    const res = await fetch(WRITER_URL, { method: 'POST', body: JSON.stringify(data) });
+    const out = await res.json();
+    if (!out.ok) {
+      if (out.auth) { localStorage.removeItem(TOKEN_KEY); $('tokenField').hidden = false; $('token').value = ''; $('token').focus(); }
+      setMsg(out.error || 'Erro ao guardar', 'err');
+      return;
+    }
+    localStorage.setItem(TOKEN_KEY, token);
+    $('tokenField').hidden = true;
+    highlight = fmtId(out.id);
+    if (highlight !== idSt.v) {
+      // Script antigo (sem suporte a ID escolhido): avisa em vez de falhar em silêncio
+      setMsg(`Guardado como #${highlight} — atualiza o Apps Script para escolher o ID`, 'err');
+    } else {
+      setMsg(`#${highlight} ${out.action === 'update' ? 'atualizado' : 'adicionado'}`, 'ok');
+    }
+    startNew();
+    if (document.activeElement) document.activeElement.blur(); // fecha o teclado
+    await loadRows();
+  } catch (e) {
+    setMsg('Sem ligação ao script', 'err');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+$('tokenField').hidden = !!localStorage.getItem(TOKEN_KEY);
+buildChips('objChips', 'objetivo', OBJETIVOS);
+buildChips('modChips', 'modelo', MODELOS);
+fillPaises('');
+startNew();
+loadRows();
+</script>
+</body>
+</html>
