@@ -3344,6 +3344,28 @@ function loadGlobeObjetivos() {
   }).catch(err => console.warn('Falha a carregar países dos Objetivos para o globo:', err));
 }
 
+/* ── GLOBO: pinos azuis — Matriz de Polivalência, separador "Formação Equipas ATO":
+      linhas com "Sim" na coluna H (ATO EXCELSIOR); país lido da coluna C ── */
+const GLOBE_ATO_SOURCE = { id: '1-cgg5oUkqg3yVbwhoKQbEunpAzW6X_Q4', tab: 'Formação Equipas ATO' };
+
+function loadGlobeAto() {
+  return fetchSheetTable(GLOBE_ATO_SOURCE).then(table => {
+    const rows = table && Array.isArray(table.rows) ? table.rows : [];
+    const paisIdx = findSheetCell(table, 'Pais', 'C');
+    const atoIdx = findSheetCell(table, 'ATO EXCELSIOR', 'H');
+    const txt = (row, i) => {
+      const v = getValueFromRow(row, i);
+      return v == null ? '' : String(v).trim();
+    };
+    const paises = rows
+      .filter(row => txt(row, atoIdx).toLowerCase() === 'sim')
+      .map(row => txt(row, paisIdx))
+      .filter(Boolean);
+    paises.forEach(p => { if (!getCountryCoordinates(p)) console.warn(`Globo ATO: país sem coordenadas — "${p}"`); });
+    if (typeof window.updateGlobeAtoPins === 'function') window.updateGlobeAtoPins(paises);
+  }).catch(err => console.warn('Falha a carregar países ATO para o globo:', err));
+}
+
 // Modelo/Lote (PS1!D2), Início (PS1!J2), Previsto (PS1!F2) e estado (PS1!A2).
 function refreshPs1Details() {
   const DATE_PLACEHOLDER = '-- / -- / ----';
@@ -3628,11 +3650,14 @@ function initializeSheetWatcher() {
   // Globo: países dos Objetivos (o globo é criado mais abaixo → 1ª leitura no próximo tick)
   setTimeout(loadGlobeObjetivos, 0);
   const globeObjTimer = setInterval(loadGlobeObjetivos, SHEET_POLL_INTERVAL);
+  setTimeout(loadGlobeAto, 0);
+  const globeAtoTimer = setInterval(loadGlobeAto, SHEET_POLL_INTERVAL);
 
   window.addEventListener('beforeunload', () => {
     stopPs1();
     stopPaises();
     clearInterval(globeObjTimer);
+    clearInterval(globeAtoTimer);
   });
 }
 
@@ -4311,11 +4336,12 @@ updateTime(); setInterval(updateTime, 1000);
 
   // Marcador em forma de pushpin 3D. A ponta fica nas coords (lat, lon)
   // e o pin orienta-se radialmente para fora (cabeça para o céu, ponta no globo).
-  function add3DPinMarker(lat, lon, headColor, shaftColor) {
+  function add3DPinMarker(lat, lon, headColor, shaftColor, scale) {
     const tipPos = coordToPos(lat, lon, RADIUS + 0.2);
     const outwardDir = tipPos.clone().normalize();
 
     const pin = getPushpin(headColor, shaftColor || '#cfd2d6');
+    if (scale) pin.scale.setScalar(scale);
 
     pin.position.copy(tipPos);
     const upLocal = new THREE.Vector3(0, 1, 0);
@@ -4325,8 +4351,26 @@ updateTime(); setInterval(updateTime, 1000);
     globeGroup.add(pin);
     return pin;
   }
+
+  // Pinos azuis (mais pequenos) — países com ATO EXCELSIOR = "Sim"
+  let atoPins = [];
+  function updateGlobeAtoPins(countries) {
+    atoPins.forEach(p => globeGroup.remove(p));
+    atoPins = [];
+    const seen = new Set();
+    (countries || []).forEach(name => {
+      if (!name) return;
+      const key = String(name).trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      if (key === '' || seen.has(key)) return;
+      seen.add(key);
+      const coords = getCountryCoordinates(name);
+      if (!coords) return;
+      atoPins.push(add3DPinMarker(coords.lat, coords.lon, '#d6d6ce', '#b8bcc2', 0.65));
+    });
+  }
+  window.updateGlobeAtoPins = updateGlobeAtoPins;
   // Marcadores iniciais — Portugal como pushpin (esfera branca, haste cinzenta)
-  let ptRing = add3DPinMarker(38.7, -9.1, '#ffffff', '#b8bcc2');
+  let ptRing = add3DPinMarker(38.7, -9.1, '#0e91e3', '#b8bcc2');
   let destRings = [];
 
   // Atualiza marcadores de destino. Aceita uma lista de nomes de países (ou um único string,
