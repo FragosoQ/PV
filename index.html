@@ -315,6 +315,87 @@ main {
   margin-bottom: clamp(14px, 3vh, 36px);
 }
 
+/* Tickets no cartão principal (sem scroll):
+   1 ticket  → grande, objetivo por baixo
+   2 tickets → um por linha
+   3–8       → grelha 4 colunas × 2 linhas (o 8.º lugar vira "+N" se houver mais) */
+.id-tickets {
+  --t-id: clamp(32px, 4.2vw, 72px);
+  --t-obj: clamp(20px, 3.2vh, 44px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(6px, 1.2vh, 14px) clamp(12px, 1.5vw, 24px);
+  margin-top: calc(-1 * clamp(8px, 2vh, 26px));
+  margin-bottom: clamp(14px, 3vh, 36px);
+  min-width: 0;
+  overflow: hidden;
+}
+.id-tickets[data-layout="stack"] {
+  --t-id: clamp(24px, 2.8vw, 48px);
+  --t-obj: clamp(15px, 2.2vh, 28px);
+}
+.id-tickets[data-layout="grid"] {
+  --t-id: clamp(18px, 2vw, 36px);
+  --t-obj: clamp(12px, 1.7vh, 22px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.ticket-row {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2px, 0.5vh, 8px);
+}
+.id-tickets[data-layout="stack"] .ticket-row,
+.id-tickets[data-layout="grid"] .ticket-row {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.6em;
+  padding-left: 0.6em;
+  border-left: 3px solid #ffd400;
+}
+.id-tickets[data-layout="grid"] .ticket-row {
+  flex-direction: column;
+  gap: 2px;
+}
+.ticket-row.ticket-more {
+  justify-content: center;
+  border-left-color: rgba(255,255,255,0.3) !important;
+}
+.id-ticket {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: var(--t-id);
+  letter-spacing: 2px; color: #fff;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.id-ticket-modelo {
+  margin-left: 0.4em;
+  font-size: 0.6em;
+  letter-spacing: 1px;
+  color: #ffd400;
+  vertical-align: middle;
+}
+.id-ticket-obj {
+  font-size: var(--t-obj);
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.15;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.id-tickets[data-layout="single"] .id-ticket-obj {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+@media (max-width: 900px) {
+  .id-tickets[data-layout="grid"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .id-cliente {
   font-size: clamp(21.42px, 2.45vw, 48.96px);
   font-weight: 700;
@@ -558,6 +639,13 @@ main {
   gap: 0.5em;
   min-width: 0;
 }
+.obj-item .obj-id {
+  flex: 0 0 auto;
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.55);
+}
 .obj-item .obj-title {
   flex: 1 1 auto;
   min-width: 0;
@@ -578,6 +666,10 @@ main {
 }
 .obj-item .obj-status.is-done { border-color: rgba(0,255,135,0.45); color: #00ff87; }
 .obj-item .obj-status.is-late { border-color: rgba(255,90,90,0.6); color: #ff6b6b; }
+.obj-item .obj-status.st-analise  { border-color: rgba(170,170,170,0.6); color: #b0b0b0; }
+.obj-item .obj-status.st-agendado { border-color: rgba(0,150,255,0.6);   color: #3aa0ff; }
+.obj-item .obj-status.st-curso    { border-color: rgba(255,210,0,0.6);   color: #ffd400; }
+.obj-item .obj-status.st-final    { border-color: rgba(0,255,135,0.45);  color: #00ff87; }
 .obj-item .obj-meta {
   font-size: 0.68em;
   font-weight: 600;
@@ -643,12 +735,12 @@ main {
 .globe-brand {
   max-width: 100%;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(52px, 11vw, 150px);
+  font-size: clamp(32px, 6vw, 110px);
   line-height: 1;
   letter-spacing: 2px;
   color: rgba(255,255,255,0.65);
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: clamp(8px, 1.5vh, 18px);
 }
   
 
@@ -693,49 +785,6 @@ main {
 .prazo-div { font-size: clamp(24px, 3.6vh, 36px); color: rgba(255,255,255,0.4); font-weight: 300; }
 .prazo-total { font-size: clamp(32px, 4.8vh, 48px); color: #fff; font-weight: 300; letter-spacing: -1px; }
 .prazo-unit { font-size: clamp(14px, 1.8vh, 18px); letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.75); align-self: flex-end; padding-bottom: clamp(6px, 1vh, 10px); }
-
-/* Faixa "Prioridade em Curso" no fundo da secção de evolução */
-.prio-curso {
-  align-self: stretch;
-  margin-top: auto;
-  padding: clamp(6px, 1vh, 12px) clamp(10px, 1.5vw, 18px) 0;
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-.prio-curso[hidden] { display: none; }
-.prio-curso-top {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  margin-bottom: clamp(4px, 0.6vh, 8px);
-}
-.prio-curso-label {
-  font-size: clamp(11px, 1.5vh, 16px);
-  font-weight: 700; letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.6);
-}
-.prio-curso-name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(16px, 2.2vh, 24px);
-  letter-spacing: 1px; line-height: 1.1;
-  color: #fff;
-}
-.prio-curso-pct {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(30px, 4.6vh, 56px);
-  line-height: .9;
-  color: #00d4ff;
-}
-.prio-curso-pct small { font-size: .55em; }
-.prio-curso-track {
-  height: clamp(4px, 0.6vh, 7px);
-  background: rgba(255,255,255,0.12);
-  border-radius: 4px; overflow: hidden;
-}
-.prio-curso-bar {
-  height: 100%; width: 0;
-  border-radius: 4px;
-  background: #00ff87;
-  transition: width .6s ease;
-}
 
 .prazo-track {
   height: clamp(8px, 1.2vh, 12px);
@@ -805,6 +854,76 @@ main {
   font-weight: 700;
   color: #fff; letter-spacing: .5px;
 }
+
+/* ── Vários tickets: Evolução / Prazo / Datas por ticket ──
+   Classe .is-multi no <body> esconde os blocos de ticket único. */
+body.is-multi #evNum,
+body.is-multi .prazo-top,
+body.is-multi .prazo-numbers,
+body.is-multi .prazo-track,
+body.is-multi .details-inner { display: none; }
+.multi-ev[hidden], .multi-prazo[hidden], .multi-details[hidden] { display: none; }
+
+.multi-ev {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+  gap: clamp(6px, 1vh, 12px) clamp(12px, 1.5vw, 24px);
+  width: 100%;
+  padding: 0 clamp(12px, 1.5vw, 24px);
+  overflow: hidden;
+}
+.multi-ev-item {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 0;
+}
+.multi-ev-id {
+  font-size: clamp(12px, 1.6vh, 18px);
+  font-weight: 700; letter-spacing: 2px;
+  color: rgba(255,255,255,0.7);
+}
+.multi-ev-pct {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: var(--ev-size, clamp(48px, 9vh, 140px));
+  line-height: .9;
+}
+
+.multi-prazo, .multi-details {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+  gap: clamp(4px, 0.8vh, 10px) clamp(12px, 1.5vw, 20px);
+  overflow: hidden;
+}
+.multi-prazo-item, .multi-details-item {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0 0.6em;
+  font-size: clamp(12px, 1.6vh, 18px);
+  font-weight: 700;
+  color: #fff;
+}
+.multi-tid {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3em; letter-spacing: 1px;
+  color: rgba(255,255,255,0.75);
+}
+.multi-prazo-days { white-space: nowrap; }
+.multi-prazo-days small { font-size: .75em; color: rgba(255,255,255,0.6); }
+.multi-prazo-rest { font-size: .8em; white-space: nowrap; }
+.multi-prazo-track {
+  grid-column: 1 / -1;
+  height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.1);
+  overflow: hidden;
+  margin-top: 2px;
+}
+.multi-prazo-bar { height: 100%; border-radius: 2px; }
+.multi-details-item { grid-template-columns: auto minmax(0, 1fr); }
+.multi-details-dates {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.multi-details-dates .d-k { margin-right: 0.3em; }
 
 /* ══════════════════════════════════════
    FOOTER
@@ -1076,8 +1195,9 @@ footer {
           </div>
 
           <div class="id-cliente-label" style="margin-top:clamp(10px,2vh,20px);">Modelo / Equipamento</div>
-          <div class="id-modelo">MWS715 SDS EXD DRD</div>
-          <div class="id-lote">Objetivo</div>
+          <div class="id-modelo">—</div>
+          <div class="id-lote">TICKET</div>
+          <div class="id-tickets" data-layout="single"><div class="ticket-row"><div class="id-ticket">—</div></div></div>
         </div>
       </div>
 
@@ -1104,19 +1224,8 @@ footer {
         </div>
         <div style="margin-top:50px;font-size:clamp(14px,1.8vh,20px);font-weight:700;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,0.75);">Evolução Global</div>
         <div id="evNum" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(140px,22vh,340px);line-height:.85;letter-spacing:-2px;">46%</div>
+        <div class="multi-ev" id="evMulti" hidden></div>
         <div id="statusLabel" style="font-size:clamp(15px,2vh,22px);letter-spacing:4px;color:rgba(255,255,255,0.75);text-transform:uppercase;">Em Curso · ON</div>
-        <div class="prio-curso" id="prioCurso" hidden>
-          <div class="prio-curso-top">
-            <div>
-              <div class="prio-curso-label">Prioridade em Curso</div>
-              <div class="prio-curso-name" id="prioCursoName">—</div>
-            </div>
-            <div class="prio-curso-pct"><span id="prioCursoPct">0</span><small>%</small></div>
-          </div>
-          <div class="prio-curso-track">
-            <div class="prio-curso-bar" id="prioCursoBar"></div>
-          </div>
-        </div>
       </div>
 
       <!-- PRAZO -->
@@ -1134,6 +1243,7 @@ footer {
         <div class="prazo-track">
           <div class="prazo-fill-bar" id="prazoBar"></div>
         </div>
+        <div class="multi-prazo" id="prazoMulti" hidden></div>
         <div class="prazo-hours" id="prazoHours" hidden>
           <div class="prazo-hours-track">
             <div class="prazo-hours-bar" id="prazoHoursBar" role="progressbar" aria-label="Horas úteis decorridas"></div>
@@ -1143,6 +1253,7 @@ footer {
 
       <!-- DETALHES -->
       <div class="details-section">
+        <div class="multi-details" id="detailsMulti" hidden></div>
         <div class="details-inner">
           <div class="detail-row">
             <span class="d-k">Início</span>
@@ -2283,9 +2394,147 @@ function renderText(el, value, fallback = '') {
   el.textContent = value != null ? String(value) : fallback;
 }
 
+// Cartão principal: lista de tickets (ID + OBJETIVO). O tamanho adapta-se
+// ao número de tickets via data-layout (ver CSS .id-tickets).
+const ticketsEl = document.querySelector('.id-tickets');
+function renderTickets(tickets) {
+  if (!ticketsEl) return;
+  const list = Array.isArray(tickets) ? tickets : [];
+  ticketsEl.dataset.layout = list.length <= 1 ? 'single' : list.length === 2 ? 'stack' : 'grid';
+  // Grelha 4×2: no máximo 8 lugares; se houver mais, o último mostra "+N"
+  const MAX_TICKETS = 8;
+  const shown = list.length > MAX_TICKETS ? list.slice(0, MAX_TICKETS - 1) : list;
+  const extra = list.length - shown.length;
+  // Modelo / Equipamento: coluna MODELO (H) dos tickets mostrados, sem repetidos
+  const modelos = [...new Set(list.map(t => t.modelo).filter(Boolean))];
+  renderText(modelEl, modelos.length ? modelos.join(' · ') : '—', '—');
+  // País: coluna PAÍS (F) dos tickets mostrados, sem repetidos
+  currentTicketPaises = [...new Set(list.map(t => t.pais).filter(Boolean))];
+  renderPaisesFromTickets();
+  updatePrazoFromTickets(list);
+  ticketsEl.innerHTML = list.length
+    ? shown.map(t => `<div class="ticket-row" title="${escapeHtml(t.value || '')}">
+        <div class="id-ticket">${t.id ? `#${escapeHtml(t.id)}` : '—'}${t.modelo ? `<span class="id-ticket-modelo">${escapeHtml(t.modelo)}</span>` : ''}</div>
+        <div class="id-ticket-obj">${escapeHtml(t.value || '—')}</div>
+      </div>`).join('')
+      + (extra > 0 ? `<div class="ticket-row ticket-more"><div class="id-ticket">+${extra}</div></div>` : '')
+    : '<div class="ticket-row"><div class="id-ticket">—</div></div>';
+}
+
+// Prazo (Início / Previsto / dias) e % de evolução a partir dos tickets mostrados.
+// Vários tickets: Início = DATA PEDIDO (C) mais antiga, Previsto = DATA PREVISTA (D)
+// mais tardia; % = média dos tickets.
+// % de cada ticket: coluna EVOLUÇÃO (I). Se estiver vazia: dias úteis decorridos /
+// dias úteis totais × 90, no máximo 90%; 100% quando o STATUS é "Finalizado".
+const EV_AUTO_MAX = 90;
+function ticketPct(t) {
+  // % vem da coluna EVOLUÇÃO (I); só se estiver vazia é que se calcula automaticamente
+  if (t.evolucao != null) return t.evolucao;
+  if (objStatusClass(t.status) === ' st-final') return 100;
+  if (!t.pedidoDate || !t.prevDate) return 0;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  if (today < t.pedidoDate) return 0;
+  if (today > t.prevDate) return EV_AUTO_MAX;
+  const total = getWorkDaysCount(t.pedidoDate, t.prevDate, true);
+  const used = getWorkDaysCount(t.pedidoDate, today, true);
+  if (!total || used == null) return 0;
+  return Math.max(0, Math.min(EV_AUTO_MAX, Math.round((used / total) * EV_AUTO_MAX)));
+}
+
+function updatePrazoFromTickets(list) {
+  const fmt = d => d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const DATE_PH = '-- / -- / ----';
+  const starts = list.map(t => t.pedidoDate).filter(Boolean);
+  const dues = list.map(t => t.prevDate).filter(Boolean);
+  const start = starts.length ? new Date(Math.min(...starts)) : null;
+  const due = dues.length ? new Date(Math.max(...dues)) : null;
+  renderText(dataInicioEl, start ? fmt(start) : DATE_PH, DATE_PH);
+  renderText(dataPrevistaEl, due ? fmt(due) : DATE_PH, DATE_PH);
+  updateDeadline(start, due, null);
+
+  const pct = list.length
+    ? Math.round(list.reduce((sum, t) => sum + ticketPct(t), 0) / list.length)
+    : 0;
+  updateEvolucao(pct);
+  renderMultiTickets(list, fmt);
+}
+
+// Vários tickets: mostra Evolução, Prazo e Datas de cada ticket (sem scroll).
+// Até 4 tickets: 1 coluna no prazo/datas; 5+: 2 colunas.
+const evMultiEl = document.getElementById('evMulti');
+const prazoMultiEl = document.getElementById('prazoMulti');
+const detailsMultiEl = document.getElementById('detailsMulti');
+
+function ticketDeadline(t) {
+  if (!t.pedidoDate || !t.prevDate) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const total = getWorkDaysCount(t.pedidoDate, t.prevDate, true);
+  const used = Math.max(0, getWorkDaysCount(t.pedidoDate, today, true) || 0);
+  const remaining = getWorkDaysCount(today, t.prevDate, false);
+  if (total == null || remaining == null) return null;
+  const ratio = total > 0 ? Math.min(1, used / total) : 0;
+  const isOverdue = used > total;
+  const color = isOverdue ? '#ff3b3b' : ratio >= .7 ? '#ffaa00' : '#00ff87';
+  const restColor = isOverdue ? '#ff3b3b' : remaining <= 3 ? '#ffaa00' : '#00ff87';
+  return { total, used, remaining, ratio, color, restColor };
+}
+
+function renderMultiTickets(list, fmt) {
+  const multi = list.length > 1;
+  document.body.classList.toggle('is-multi', multi);
+  [evMultiEl, prazoMultiEl, detailsMultiEl].forEach(el => { if (el) el.hidden = !multi; });
+  if (!multi) return;
+
+  const shown = list.slice(0, 8);
+  const tid = t => `<span class="multi-tid">${t.id ? `#${escapeHtml(t.id)}` : '—'}</span>`;
+
+  if (evMultiEl) {
+    const cols = shown.length <= 2 ? shown.length : shown.length <= 4 ? 2 : 4;
+    const rows = Math.ceil(shown.length / cols);
+    evMultiEl.style.setProperty('--cols', cols);
+    evMultiEl.style.setProperty('--ev-size', rows > 1
+      ? (cols > 2 ? 'clamp(28px, 5vh, 70px)' : 'clamp(40px, 7vh, 100px)')
+      : 'clamp(56px, 11vh, 160px)');
+    evMultiEl.innerHTML = shown.map(t => {
+      const p = ticketPct(t);
+      return `<div class="multi-ev-item">
+        <span class="multi-ev-id">#${escapeHtml(t.id || '—')}</span>
+        <span class="multi-ev-pct" style="color:${ec(p)};text-shadow:0 0 40px ${ec(p)}40">${p}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  const cols2 = shown.length > 4 ? 2 : 1;
+  if (prazoMultiEl) {
+    prazoMultiEl.style.setProperty('--cols', cols2);
+    prazoMultiEl.innerHTML = shown.map(t => {
+      const d = ticketDeadline(t);
+      if (!d) return `<div class="multi-prazo-item">${tid(t)}<span class="multi-prazo-days">—</span><span></span></div>`;
+      return `<div class="multi-prazo-item">
+        ${tid(t)}
+        <span class="multi-prazo-days" style="color:${d.color}">${d.used}<small> / ${d.total} dias</small></span>
+        <span class="multi-prazo-rest" style="color:${d.restColor}">${d.remaining} dias restantes</span>
+        <div class="multi-prazo-track"><div class="multi-prazo-bar" style="width:${d.ratio * 100}%;background:${d.color}"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  if (detailsMultiEl) {
+    detailsMultiEl.style.setProperty('--cols', cols2);
+    detailsMultiEl.innerHTML = shown.map(t => `<div class="multi-details-item">
+        ${tid(t)}
+        <span class="multi-details-dates">
+          <span class="d-k">Início</span>${t.pedidoDate ? fmt(t.pedidoDate) : '—'}
+          &nbsp;·&nbsp;
+          <span class="d-k">Previsto</span>${t.prevDate ? fmt(t.prevDate) : '—'}
+        </span>
+      </div>`).join('');
+  }
+}
+
 function renderLote(value) {
   if (!loteEl) return;
-  loteEl.textContent = 'Objetivo';
+  loteEl.textContent = 'TICKET';
 }
 
 // Helper: escape básico para conteúdo dinâmico inserido via innerHTML
@@ -2372,6 +2621,16 @@ async function fetchSecondaryRowsRange(tab, columns, startRow, endRow) {
 // STATUS considerado "concluído" → item esbatido e enviado para o fim da lista
 const OBJ_DONE_RE = /conclu|feito|fechad|termin|done|ok\b/i;
 
+// Cor da etiqueta de STATUS no card Planeamento
+function objStatusClass(status) {
+  const s = String(status || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (/analise/.test(s)) return ' st-analise';   // cinza
+  if (/agendad/.test(s)) return ' st-agendado';  // azul
+  if (/em curso|curso/.test(s)) return ' st-curso'; // amarelo
+  if (/finaliz|conclu/.test(s)) return ' st-final'; // verde
+  return '';
+}
+
 // Datas da folha de Objetivos: aceita "dd/mm/aaaa" (texto) ou Date(...) do gviz
 function parseObjDate(value) {
   if (value == null || String(value).trim() === '') return null;
@@ -2382,6 +2641,30 @@ function parseObjDate(value) {
     return isNaN(d.getTime()) ? null : d;
   }
   return parseSheetDate(value);
+}
+
+// IDs da folha de Objetivos com 4 algarismos (o gviz devolve "0001" como número 1)
+function fmtTicketId(id) {
+  const s = String(id == null ? '' : id).trim();
+  return /^\d+(\.0+)?$/.test(s) ? String(parseInt(s, 10)).padStart(4, '0') : s;
+}
+
+// Coluna EVOLUÇÃO (I): "10" = 10%. Se a célula estiver formatada como % no
+// Sheets (ex: "10%"), o gviz devolve 0.1 → converte para 10. Vazio → null.
+function parseObjEvolucao(row, idx) {
+  if (!row || !Array.isArray(row.c) || idx < 0) return null;
+  const cell = row.c[idx];
+  if (!cell || (cell.v == null && cell.f == null)) return null;
+  const fmt = cell.f != null ? String(cell.f) : '';
+  let n;
+  if (typeof cell.v === 'number') {
+    n = fmt.includes('%') ? cell.v * 100 : cell.v;
+  } else {
+    const m = String(cell.v != null ? cell.v : fmt).replace(',', '.').match(/-?\d+(\.\d+)?/);
+    if (!m) return null;
+    n = Number(m[0]);
+  }
+  return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : null;
 }
 
 async function fetchZonaListValues(source) {
@@ -2396,11 +2679,15 @@ async function fetchZonaListValues(source) {
     if (!table || !Array.isArray(table.rows)) return [];
     const col = (header, letter) => findSheetCell(table, header, letter);
     const idx = {
+      id: col('ID', 'A'),
       objetivo: col('OBJETIVO', 'B'),
+      pedido: col('DATA PEDIDO', 'C'),
       prevista: col('DATA PREVISTA', 'D'),
       quem: col('PEDIDO POR:', 'E'),
       pais: col('PAÍS', 'F'),
       status: col('STATUS', 'G'),
+      modelo: col('MODELO', 'H'),
+      evolucao: col('EVOLUÇÃO', 'I'),
     };
     const txt = (row, i) => {
       const v = getValueFromRow(row, i);
@@ -2418,11 +2705,16 @@ async function fetchZonaListValues(source) {
         ? prevDate.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })
         : (prevRaw != null ? String(prevRaw).trim() : '');
       const late = !done && prevDate && prevDate < today;
-      const meta = [txt(row, idx.quem), txt(row, idx.pais), prevTxt].filter(Boolean).join(' · ');
-      return { value, meta, status, dim: done, late };
+      const modelo = txt(row, idx.modelo);
+      const meta = [modelo, txt(row, idx.quem), txt(row, idx.pais), prevTxt].filter(Boolean).join(' · ');
+      return { id: fmtTicketId(txt(row, idx.id)), modelo, pais: txt(row, idx.pais), pedidoDate: parseObjDate(getValueFromRow(row, idx.pedido)), prevDate, evolucao: parseObjEvolucao(row, idx.evolucao), value, meta, status, dim: done, late };
     }).filter(Boolean);
     // Pendentes primeiro (ordem da folha), concluídos no fim
     items.sort((a, b) => Number(a.dim) - Number(b.dim));
+    // Cartão principal: todos os tickets EM CURSO (ordem da folha);
+    // se não houver nenhum, mostra o primeiro da lista.
+    const emCurso = items.filter(it => objStatusClass(it.status) === ' st-curso');
+    renderTickets(emCurso.length ? emCurso : items.slice(0, 1));
     return items.slice(0, Math.max(1, source.limit || 6));
   }
 
@@ -2559,9 +2851,10 @@ function buildZonaListCard(config, items) {
         const dim = !!(item && typeof item === 'object' && item.dim);
         // Item rico (ex: Objetivos): título + meta + etiqueta de status
         if (item && typeof item === 'object' && ('meta' in item || 'status' in item)) {
-          const statusCls = item.dim ? ' is-done' : (item.late ? ' is-late' : '');
+          const statusCls = objStatusClass(item.status) || (item.dim ? ' is-done' : (item.late ? ' is-late' : ''));
           return `<div class="zona-card-list-item obj-item${dim ? ' dim' : ''}">
               <div class="obj-top">
+                ${item.id ? `<span class="obj-id">#${escapeHtml(item.id)}</span>` : ''}
                 <span class="obj-title">${escapeHtml(text)}</span>
                 ${item.status ? `<span class="obj-status${statusCls}">${escapeHtml(item.status)}</span>` : ''}
               </div>
@@ -2899,65 +3192,64 @@ function setPaisEmpty() {
   paisContainerEl.classList.remove('is-grid');
   paisContainerEl.innerHTML = `
     <span class="id-flag"></span>
-    <span class="id-pais-info">${modelDataAvailable ? PAIS_PLACEHOLDER : '--'}</span>`;
+    <span class="id-pais-info">${PAIS_PLACEHOLDER}</span>`;
 }
 
 function setPaisSingle(pais, idioma) {
   if (!paisContainerEl) return;
-  if (!modelDataAvailable) { setPaisEmpty(); return; }
   paisContainerEl.classList.remove('is-grid');
   const flag = getCountryFlag(pais) || '';
-  const idiomaTxt = idioma ? idioma.toUpperCase() : '—';
+  const idiomaTxt = idioma ? ` · ${escapeHtml(idioma.toUpperCase())}` : '';
   paisContainerEl.innerHTML = `
     <span class="id-flag">${escapeHtml(flag)}</span>
-    <span class="id-pais-info">${escapeHtml(pais.toUpperCase())} · ${escapeHtml(idiomaTxt)}</span>`;
+    <span class="id-pais-info">${escapeHtml(pais.toUpperCase())}${idiomaTxt}</span>`;
 }
 
 function setPaisGrid(pares) {
   if (!paisContainerEl) return;
-  if (!modelDataAvailable) { setPaisEmpty(); return; }
   paisContainerEl.classList.add('is-grid');
   paisContainerEl.innerHTML = pares.map(p => {
     const flag = getCountryFlag(p.pais) || '';
-    const idiomaTxt = p.idioma ? p.idioma.toUpperCase() : '—';
+    const idiomaTxt = p.idioma ? ` · ${escapeHtml(p.idioma.toUpperCase())}` : '';
     return `
       <div class="id-pais-cell">
         <span class="id-flag">${escapeHtml(flag)}</span>
-        <span class="id-pais-info">${escapeHtml(p.pais.toUpperCase())} · ${escapeHtml(idiomaTxt)}</span>
+        <span class="id-pais-info">${escapeHtml(p.pais.toUpperCase())}${idiomaTxt}</span>
       </div>`;
   }).join('');
+}
+
+// País do cartão principal: vem da coluna PAÍS (F) dos tickets (ver renderTickets).
+// O idioma não existe na folha de Objetivos — é procurado na tabela
+// montagemEditável L:M (país | idioma), usada só como dicionário.
+let currentTicketPaises = [];
+let PAIS_IDIOMA = {};
+const normPais = p => String(p || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+function renderPaisesFromTickets() {
+  const valid = currentTicketPaises
+    .map(pais => ({ pais, idioma: PAIS_IDIOMA[normPais(pais)] || '' }))
+    .sort((a, b) => a.pais.localeCompare(b.pais, 'pt', { sensitivity: 'base' }));
+  if (valid.length === 0) setPaisEmpty();
+  else if (valid.length === 1) setPaisSingle(valid[0].pais, valid[0].idioma);
+  else setPaisGrid(valid);
 }
 
 function loadAndRenderPaises() {
   return fetchSheetTable({ id: SHEET_CONFIG_DEFAULT.id, ...PAIS_RANGE }).then(table => {
     const rows = table && Array.isArray(table.rows) ? table.rows : [];
-    const cellText = (row, idx) => {
-      const value = getValueFromRow(row, idx);
-      return value != null ? String(value).trim() : '';
-    };
-    // Coluna 0 = L (país), coluna 1 = M (idioma)
-    const valid = rows
-      .map(row => ({ pais: cellText(row, 0), idioma: cellText(row, 1) }))
-      .filter(r => r.pais !== '');
-
-    if (valid.length === 0) {
-      setPaisEmpty();
-      return;
-    }
-
-    // Ordenação alfabética pelo nome do país (locale PT, insensível a acentos/maiúsculas)
-    valid.sort((a, b) => a.pais.localeCompare(b.pais, 'pt', { sensitivity: 'base' }));
-
-    if (valid.length === 1) {
-      setPaisSingle(valid[0].pais, valid[0].idioma);
-    } else {
-      setPaisGrid(valid);
-    }
-
+    const map = {};
+    rows.forEach(row => {
+      const pais = getValueFromRow(row, 0);
+      const idioma = getValueFromRow(row, 1);
+      if (pais != null && String(pais).trim() !== '' && idioma != null && String(idioma).trim() !== '') {
+        map[normPais(pais)] = String(idioma).trim();
+      }
+    });
+    PAIS_IDIOMA = map;
   }).catch(err => {
-    console.warn('Falha a carregar países do montagemEditável:', err);
-    setPaisEmpty();
-  });
+    console.warn('Falha a carregar idiomas do montagemEditável:', err);
+  }).finally(renderPaisesFromTickets);
 }
 
 /* ── GLOBO: países da folha de Objetivos (coluna PAÍS), excepto STATUS "Finalizado" ── */
@@ -3013,16 +3305,14 @@ function refreshPs1Details() {
     const previstoFmt = previsto != null && String(previsto).trim() !== ''
       ? formatSheetDate(previsto) || DATE_PLACEHOLDER
       : DATE_PLACEHOLDER;
-    renderText(dataInicioEl, inicioFmt, DATE_PLACEHOLDER);
-    renderText(dataPrevistaEl, previstoFmt, DATE_PLACEHOLDER);
-    updateDeadline(inicio, previsto, inicioHora);
+    // Início / Previsto / Prazo vêm agora da folha de Objetivos (ver updatePrazoFromTickets)
 
     const { modelo, lote } = parseModeloLote(modeloLote);
     modelDataAvailable = Boolean(modelo);
-    renderText(modelEl, modelo || MODEL_PLACEHOLDER, MODEL_PLACEHOLDER);
+    // Modelo / Equipamento vem agora da coluna MODELO (H) da folha de Objetivos (ver renderTickets)
     loadAndRenderPaises();
     if (loteEl) {
-      loteEl.textContent = 'Objetivo';
+      loteEl.textContent = 'TICKET';
     }
     // Actualiza referência usada pelas listas para destacar o item activo
     currentModeloLote = (modelo && lote) ? `${modelo} - ${lote}` : null;
@@ -3033,12 +3323,8 @@ function refreshPs1Details() {
     console.warn('Falha a carregar dados do PS1:', err);
     modelDataAvailable = false;
     loadAndRenderPaises();
-    renderText(dataInicioEl, DATE_PLACEHOLDER, DATE_PLACEHOLDER);
-    renderText(dataPrevistaEl, DATE_PLACEHOLDER, DATE_PLACEHOLDER);
-    updateDeadline(null, null);
-    renderText(modelEl, MODEL_PLACEHOLDER, MODEL_PLACEHOLDER);
     if (loteEl) {
-      loteEl.textContent = 'Objetivo';
+      loteEl.textContent = 'TICKET';
     }
     updateStatus(null);
     currentModeloLote = null;
@@ -3231,27 +3517,6 @@ async function fetchPs1Summary() {
   };
 }
 
-// Último estado da prioridade 0,1/0,2, para atualizar a % com o passar do tempo
-// mesmo sem alterações na Sheet.
-let currentTimedPriority = null;
-setInterval(() => {
-  if (!currentTimedPriority) return;
-  updatePrioridadeEmCurso(currentTimedPriority.prioridade, computeTimedPriorityPct(currentTimedPriority.info));
-}, 30 * 1000);
-
-// Faixa "Prioridade em Curso": % de realização da prioridade ativa.
-// Fica escondida apenas quando não há prioridade ativa.
-function updatePrioridadeEmCurso(prioridade, pct) {
-  const box = document.getElementById('prioCurso');
-  if (!box) return;
-  const visible = Boolean(prioridade);
-  box.hidden = !visible;
-  if (!visible) return;
-  document.getElementById('prioCursoName').textContent = /^\d+(?:[.,]\d+)?$/.test(prioridade) ? `P${prioridade}` : prioridade;
-  const percentage = pct == null ? 0 : Math.max(0, Math.min(100, pct));
-  document.getElementById('prioCursoPct').textContent = percentage.toFixed(1).replace('.', ',');
-  document.getElementById('prioCursoBar').style.width = `${percentage}%`;
-}
 
 function refreshPs1Fields() {
   return fetchPs1Summary().then(({ prioridadeAtiva, prioridadeAtivaPct, timedInfo, geral }) => {
@@ -3262,8 +3527,6 @@ function refreshPs1Fields() {
       : null;
     if (ativaValueEl) ativaValueEl.textContent = prioridade || '—';
     if (ativaBox) ativaBox.classList.toggle('is-empty', !prioridade);
-    currentTimedPriority = prioridade && timedInfo ? { prioridade, info: timedInfo } : null;
-    updatePrioridadeEmCurso(prioridade, prioridadeAtivaPct);
 
     const geralPct = parseSheetPercentage(geral);
     if (geralPct == null) {
@@ -3271,16 +3534,13 @@ function refreshPs1Fields() {
     } else {
       console.log('[evolução] GERAL(T) (PS1!N2) =', geral, '→', geralPct, '%');
     }
-    updateEvolucao(geralPct != null ? geralPct : 0);
+    // A % de evolução vem agora dos tickets (ver updatePrazoFromTickets)
   }).catch(err => {
     console.warn('Falha a carregar prioridade ativa/evolução do PS1:', err);
     const ativaBox = document.getElementById('prioridadeAtiva');
     const ativaValueEl = document.getElementById('prioridadeAtivaValue');
     if (ativaValueEl) ativaValueEl.textContent = '—';
     if (ativaBox) ativaBox.classList.add('is-empty');
-    currentTimedPriority = null;
-    updatePrioridadeEmCurso(null, null);
-    updateEvolucao(0);
   });
 }
 
