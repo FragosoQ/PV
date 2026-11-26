@@ -3984,6 +3984,8 @@ updateTime(); setInterval(updateTime, 1000);
   // Globo 15% mais pequeno: afastar a câmara na proporção inversa (1 / 0.85)
   camera.position.set(0, 30, 380).multiplyScalar(1 / 0.85);
   camera.lookAt(0, 0, 0);
+  const CAM_DIR  = camera.position.clone().normalize();
+  const CAM_DIST = camera.position.length();
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(W, H);
@@ -3992,6 +3994,19 @@ updateTime(); setInterval(updateTime, 1000);
   container.appendChild(renderer.domElement);
 
   const RADIUS = 140 * 0.96;
+
+  // Afasta a câmara quando a coluna é estreita, para o globo caber na largura
+  // (o tamanho base continua a ser o definido por CAM_DIST quando há espaço).
+  function fitCameraToWidth(w, h) {
+    const FIT_R  = RADIUS * 1.08;                       // globo + margem para o brilho
+    const halfV  = THREE.MathUtils.degToRad(camera.fov / 2);
+    const halfH  = Math.atan(Math.tan(halfV) * (w / h));
+    const needed = FIT_R / Math.sin(Math.min(halfH, halfV));
+    camera.position.copy(CAM_DIR).multiplyScalar(Math.max(CAM_DIST, needed));
+    camera.lookAt(0, 0, 0);
+  }
+  fitCameraToWidth(W, H);
+
   const globeGroup = new THREE.Group();
   scene.add(globeGroup);
 
@@ -4321,6 +4336,7 @@ updateTime(); setInterval(updateTime, 1000);
     if (W2 === 0 || H2 === 0) return;
     camera.aspect = W2 / H2;
     camera.updateProjectionMatrix();
+    fitCameraToWidth(W2, H2);
     renderer.setSize(W2, H2);
   });
   ro.observe(container);
