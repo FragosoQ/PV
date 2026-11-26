@@ -188,11 +188,22 @@ main {
 ══════════════════════════════════════ */
 .left {
   display: grid;
+  /* 2 colunas: globo (ocupa toda a altura) | identidade + zonas */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) 1px auto;
   border-right: 1px solid rgba(255,255,255,0.12);
   min-height: 0;
   min-width: 0;
 }
+
+/* O .hero deixa de ser um grid próprio: os filhos passam a ser itens do .left */
+.left > .hero { display: contents; }
+.left > .hero > .hero-evolucao { grid-column: 1; grid-row: 1 / -1; }
+.left > .hero > .hero-id       { grid-column: 2; grid-row: 1; margin-top: 12px; }
+.left > .divider-h             { grid-column: 2; grid-row: 2; }
+/* O canvas do globo não deve influenciar o tamanho da grelha */
+#globeContainer > canvas { position: absolute; inset: 0; }
+.left > .zonas-panel           { grid-column: 2; grid-row: 3; }
 
 .divider-h { background: rgba(255,255,255,0.1); }
 
@@ -370,8 +381,8 @@ main {
 
 .zonas-grid {
   display: grid;
-  /* 4 colunas: Cuba/Envolv | Estrutura/Interior | Planeamento (-2%) | Histórico/Prox.Pri (+2%) */
-  grid-template-columns: 1fr 1fr 0.92fr 1.08fr;
+  /* 2 colunas: Planeamento (-2%) | Histórico/Prox.Pri (+2%) */
+  grid-template-columns: 0.92fr 1.08fr;
   grid-auto-rows: 1fr;
   gap: clamp(10px, 1.6vh, 16px) clamp(14px, 2vw, 24px);
   flex: 1;
@@ -523,6 +534,80 @@ main {
   text-align: center;
   word-break: break-word;
 }
+.zona-card-single-sub {
+  text-align: center;
+  font-size: clamp(12px, 1.5vh, 16px);
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+
+/* Itens de objetivos (Planeamento): título + status / meta */
+.zona-card-list-items .zona-card-list-item.obj-item {
+  white-space: normal;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: clamp(2px, 0.4vh, 4px) 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.obj-item .obj-top {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+  min-width: 0;
+}
+.obj-item .obj-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.obj-item .obj-status {
+  flex: 0 0 auto;
+  font-size: 0.6em;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,212,255,0.5);
+  color: #00d4ff;
+}
+.obj-item .obj-status.is-done { border-color: rgba(0,255,135,0.45); color: #00ff87; }
+.obj-item .obj-status.is-late { border-color: rgba(255,90,90,0.6); color: #ff6b6b; }
+.obj-item .obj-meta {
+  font-size: 0.68em;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.obj-item .obj-meta.is-late { color: #ff8a8a; }
+
+/* Itens de calendário (Suporte Técnico): data/hora · título */
+.zona-card-list-item.cal-item {
+  display: flex;
+  gap: 0.6em;
+  align-items: baseline;
+}
+.cal-item .cal-when {
+  flex: 0 0 auto;
+  color: rgba(255,255,255,0.5);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.cal-item .cal-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .zona-card.single.empty .zona-card-single-value {
   color: rgba(255,255,255,0.35);
   text-shadow: none;
@@ -856,6 +941,13 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .left { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .left > .hero > .hero-evolucao,
+  .left > .hero > .hero-id,
+  .left > .divider-h,
+  .left > .zonas-panel { grid-column: 1; grid-row: auto; }
+  .left > .hero > .hero-evolucao { min-height: 320px; }
+
   .hero-evolucao,
   .hero-id,
   .zonas-panel,
@@ -985,7 +1077,7 @@ footer {
 
           <div class="id-cliente-label" style="margin-top:clamp(10px,2vh,20px);">Modelo / Equipamento</div>
           <div class="id-modelo">MWS715 SDS EXD DRD</div>
-          <div class="id-lote">Lote &nbsp;·&nbsp; 26L_1</div>
+          <div class="id-lote">Objetivo</div>
         </div>
       </div>
 
@@ -1005,7 +1097,7 @@ footer {
       <!-- EVOLUÇÃO -->
       <div class="globe-section" style="flex-direction:column;gap:clamp(6px,1vh,10px);position:relative;">
         <!--<span class="posto-numero">1</span>-->
-        <div class="globe-brand">PS1</div>
+        <div class="globe-brand">PV</div>
         <div class="h-priority h-priority-left" id="prioridadeAtiva" hidden>
           <span class="h-priority-label">Prioridade Ativa</span>
           <span class="h-priority-value" id="prioridadeAtivaValue">—</span>
@@ -1112,6 +1204,10 @@ function getCacheKey(config) {
 
 function getSheetEndpoint(config) {
   const sheetId = encodeURIComponent(config.id);
+  // `gid` (ex: 0 = primeiro separador) tem prioridade quando não há `tab`
+  if (config.gid != null && !config.tab) {
+    return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${encodeURIComponent(config.gid)}&headers=1`;
+  }
   const sheetTab = encodeURIComponent(config.tab);
   // Com `range` (ex: 'L22:M26') pede só esse bloco de células, sem linha de cabeçalho.
   if (config.range) {
@@ -1820,6 +1916,9 @@ function getCountryFlag(countryName) {
     'áfrica do sul': 'ZA',
     'africa do sul': 'ZA',
     'south africa': 'ZA',
+    'república centro africana': 'CF',
+    'república centro-africana': 'CF',
+    'central african republic': 'CF',
     'nigéria': 'NG',
     'nigeria': 'NG',
     'quénia': 'KE',
@@ -2037,6 +2136,10 @@ function getCountryCoordinates(countryName) {
     'áfrica do sul': { lat: -25.75, lon: 28.19 },
     'africa do sul': { lat: -25.75, lon: 28.19 },
     'south africa': { lat: -25.75, lon: 28.19 },
+    'república centro africana': { lat: 4.4, lon: 18.6 },
+    'república centro-africana': { lat: 4.4, lon: 18.6 },
+    'rca': { lat: 4.4, lon: 18.6 },
+    'central african republic': { lat: 4.4, lon: 18.6 },
     'nigéria': { lat: 9.08, lon: 7.4 },
     'nigeria': { lat: 9.08, lon: 7.4 },
     'quénia': { lat: -1.29, lon: 36.82 },
@@ -2053,7 +2156,12 @@ function getCountryCoordinates(countryName) {
     'new zealand': { lat: -41.29, lon: 174.78 }
   };
 
-  return coordinatesMap[country] || null;
+  if (coordinatesMap[country]) return coordinatesMap[country];
+  // Fallback tolerante: ignora acentos, hífens e espaços repetidos
+  const norm = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+  const target = norm(country);
+  const hit = Object.keys(coordinatesMap).find(k => norm(k) === target);
+  return hit ? coordinatesMap[hit] : null;
 }
 
 </script>
@@ -2094,49 +2202,35 @@ const statusEl = document.getElementById('statusLabel');
 const zg = document.getElementById('zonasGrid');
 
 const ZONA_CONFIGS = [
-  { nome: 'Cuba', tab: 'PS1', header: 'CUBA', column: 'O' },
-  { nome: 'Estrutura', tab: 'PS1', header: 'ESTRUTURA', column: 'P' },
+  // Cards Cuba / Estrutura / Envolventes / Interior ocultados
+  // { nome: 'Cuba', tab: 'PS1', header: 'CUBA', column: 'O' },
+  // { nome: 'Estrutura', tab: 'PS1', header: 'ESTRUTURA', column: 'P' },
   {
+    // Lê a folha de Objetivos (A:G = ID | OBJETIVO | DATA PEDIDO | DATA PREVISTA | PEDIDO POR: | PAÍS | STATUS)
     nome: 'Planeamento',
     type: 'list',
     tall: true,
     listSource: {
-      tab: 'soldaduraEditávelMulti',
-      header: 'LOTE',
-      column: 'D',
-      // Lotes cuja coluna K (FIM SOLDADURA / ACABAMENTO) já está preenchida
-      // ficam visualmente esbatidos (concluídos).
-      dimHeader: 'FIM SOLDADURA / ACABAMENTO',
-      dimColumn: 'K',
+      mode: 'objetivos',
+      sheetId: '1VAbosk2nuuzkSqgP5DTS0M3PBnV-Oep0XRGY-aOxjMo',
+      gid: 0,
       hideHeader: true,
-      limit: 5,
+      limit: 6,
     },
   },
   {
-    nome: 'Histórico',
-    type: 'list',
-    listSource: {
-      tab: 'PS1',
-      mode: 'row-headers',
-      startColumn: 'CU',
-      endColumn: 'DT',
-      matchValue: '1',
-      replaceDots: true,
-      hideHeader: true,
-      gridLayout: { cols: 4, rows: 3, flow: 'column' },
-      limit: 26,
-    },
+    // Antigo "Histórico" — agora lê o Google Calendar "Suporte Técnico"
+    nome: 'Suporte Técnico',
+    type: 'calendar',
+    calendarSource: { cal: 'suporte_tecnico', mode: 'list', days: 30, limit: 6 },
   },
-  { nome: 'Envolventes', tab: 'PS1', header: 'Envolventes', column: 'R' },
-  { nome: 'Interior', tab: 'PS1', header: 'INTERIOR', column: 'Q' },
+  // { nome: 'Envolventes', tab: 'PS1', header: 'Envolventes', column: 'R' },
+  // { nome: 'Interior', tab: 'PS1', header: 'INTERIOR', column: 'Q' },
   {
-    nome: 'Próxima Prioridade',
-    type: 'single',
-    singleSource: {
-      tab: 'PS1',
-      header: 'Próxima Prioridade',
-      column: 'CN',
-    },
+    // Antiga "Próxima Prioridade" — agora lê o Google Calendar "Suporte 24h"
+    nome: 'Suporte 24h',
+    type: 'calendar',
+    calendarSource: { cal: 'suporte_24h', mode: 'current', days: 30 },
   },
 ];
 
@@ -2163,7 +2257,7 @@ function normalizeModeloLote(str) {
 // quantas vezes for preciso.
 function applyActiveHighlight() {
   const target = currentModeloLote ? normalizeModeloLote(currentModeloLote) : null;
-  document.querySelectorAll('.zona-card-list-item').forEach(el => {
+  document.querySelectorAll('.zona-card-list-item:not(.cal-item)').forEach(el => {
     const match = target && normalizeModeloLote(el.textContent) === target;
     el.classList.toggle('active', !!match);
   });
@@ -2191,7 +2285,7 @@ function renderText(el, value, fallback = '') {
 
 function renderLote(value) {
   if (!loteEl) return;
-  loteEl.innerHTML = `Lote &nbsp;·&nbsp; ${String(value != null ? value : LOTE_FALLBACK)}`;
+  loteEl.textContent = 'Objetivo';
 }
 
 // Helper: escape básico para conteúdo dinâmico inserido via innerHTML
@@ -2275,12 +2369,62 @@ async function fetchSecondaryRowsRange(tab, columns, startRow, endRow) {
 // Modo "row-headers": lê os labels do cabeçalho (linha 1) das colunas entre
 // `startColumn` e `endColumn`, e devolve só aqueles cuja célula da linha 2
 // não está vazia. Útil para mostrar "que postos estão activos agora".
+// STATUS considerado "concluído" → item esbatido e enviado para o fim da lista
+const OBJ_DONE_RE = /conclu|feito|fechad|termin|done|ok\b/i;
+
+// Datas da folha de Objetivos: aceita "dd/mm/aaaa" (texto) ou Date(...) do gviz
+function parseObjDate(value) {
+  if (value == null || String(value).trim() === '') return null;
+  const m = String(value).trim().match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+  if (m) {
+    const y = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
+    const d = new Date(y, Number(m[2]) - 1, Number(m[1]));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  return parseSheetDate(value);
+}
+
 async function fetchZonaListValues(source) {
   const cfg = {
-    id: SHEET_CONFIG_DEFAULT.id,
+    id: source.sheetId || SHEET_CONFIG_DEFAULT.id,
     tab: source.tab,
+    gid: source.gid,
   };
   const table = await fetchSheetTable(cfg);
+
+  if (source.mode === 'objetivos') {
+    if (!table || !Array.isArray(table.rows)) return [];
+    const col = (header, letter) => findSheetCell(table, header, letter);
+    const idx = {
+      objetivo: col('OBJETIVO', 'B'),
+      prevista: col('DATA PREVISTA', 'D'),
+      quem: col('PEDIDO POR:', 'E'),
+      pais: col('PAÍS', 'F'),
+      status: col('STATUS', 'G'),
+    };
+    const txt = (row, i) => {
+      const v = getValueFromRow(row, i);
+      return v == null ? '' : String(v).trim();
+    };
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const items = table.rows.map(row => {
+      const value = txt(row, idx.objetivo);
+      if (!value) return null;
+      const status = txt(row, idx.status);
+      const done = OBJ_DONE_RE.test(status);
+      const prevRaw = getValueFromRow(row, idx.prevista);
+      const prevDate = parseObjDate(prevRaw);
+      const prevTxt = prevDate
+        ? prevDate.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })
+        : (prevRaw != null ? String(prevRaw).trim() : '');
+      const late = !done && prevDate && prevDate < today;
+      const meta = [txt(row, idx.quem), txt(row, idx.pais), prevTxt].filter(Boolean).join(' · ');
+      return { value, meta, status, dim: done, late };
+    }).filter(Boolean);
+    // Pendentes primeiro (ordem da folha), concluídos no fim
+    items.sort((a, b) => Number(a.dim) - Number(b.dim));
+    return items.slice(0, Math.max(1, source.limit || 6));
+  }
 
   if (source.mode === 'row-headers') {
     if (!table || !Array.isArray(table.cols) || !Array.isArray(table.rows) || !table.rows[0]) {
@@ -2413,6 +2557,17 @@ function buildZonaListCard(config, items) {
     ? list.map(item => {
         const text = (item && typeof item === 'object') ? item.value : item;
         const dim = !!(item && typeof item === 'object' && item.dim);
+        // Item rico (ex: Objetivos): título + meta + etiqueta de status
+        if (item && typeof item === 'object' && ('meta' in item || 'status' in item)) {
+          const statusCls = item.dim ? ' is-done' : (item.late ? ' is-late' : '');
+          return `<div class="zona-card-list-item obj-item${dim ? ' dim' : ''}">
+              <div class="obj-top">
+                <span class="obj-title">${escapeHtml(text)}</span>
+                ${item.status ? `<span class="obj-status${statusCls}">${escapeHtml(item.status)}</span>` : ''}
+              </div>
+              ${item.meta ? `<div class="obj-meta${item.late ? ' is-late' : ''}">${escapeHtml(item.meta)}</div>` : ''}
+            </div>`;
+        }
         return `<div class="zona-card-list-item${dim ? ' dim' : ''}">${escapeHtml(text)}</div>`;
       }).join('')
     : '<div class="zona-card-list-empty">Sem dados</div>';
@@ -2450,6 +2605,97 @@ function buildZonaSingleCard(config, value) {
   return card;
 }
 
+/* ── GOOGLE CALENDAR (via Apps Script — ver apps-script/calendar-proxy.gs) ──
+   Colar aqui o URL da Aplicação Web (termina em /exec). Enquanto estiver
+   vazio, os cards de calendário mostram "Calendário não configurado". */
+const CALENDAR_PROXY_URL = 'https://script.google.com/macros/s/AKfycbwLe6UuCRf5BHerq0tva4HAWMX5naXcTHYw-lpmpDC2Ux8bNHCLygyBB0BA2BjIJc-tmw/exec';
+const CAL_TZ = 'Europe/Lisbon';
+
+async function fetchCalendarEvents(src) {
+  if (!CALENDAR_PROXY_URL) throw new Error('CALENDAR_PROXY_URL não configurado');
+  const url = `${CALENDAR_PROXY_URL}?cal=${encodeURIComponent(src.cal)}&days=${src.days || 30}&_=${Date.now()}`;
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || 'Erro no Apps Script');
+  // Remove prefixos redundantes com o nome do card ("Tec Support - ", "Suporte Técnico - ")
+  const stripTitle = t => String(t || '').replace(/^\s*(tec(h)?\s*support|suporte(\s*t[ée]cnico|\s*24h)?)\s*[-–:·]\s*/i, '').trim() || String(t || '');
+  return (data.events || []).map(ev => ({
+    title: stripTitle(ev.title),
+    start: new Date(ev.start),
+    end: new Date(ev.end),
+    allDay: !!ev.allDay,
+  }));
+}
+
+const calDayFmt = new Intl.DateTimeFormat('pt-PT', { timeZone: CAL_TZ, day: '2-digit', month: '2-digit' });
+const calWeekdayFmt = new Intl.DateTimeFormat('en-US', { timeZone: CAL_TZ, weekday: 'short' });
+const calTimeFmt = new Intl.DateTimeFormat('pt-PT', { timeZone: CAL_TZ, hour: '2-digit', minute: '2-digit' });
+const CAL_WEEKDAYS = { Sun: 'Dom', Mon: 'Seg', Tue: 'Ter', Wed: 'Qua', Thu: 'Qui', Fri: 'Sex', Sat: 'Sáb' };
+
+function formatCalWhen(ev) {
+  const day = `${CAL_WEEKDAYS[calWeekdayFmt.format(ev.start)] || ''} ${calDayFmt.format(ev.start)}`.trim();
+  return ev.allDay ? day : `${day} ${calTimeFmt.format(ev.start)}`;
+}
+
+function isCalOngoing(ev, now = new Date()) {
+  return ev.start <= now && ev.end > now;
+}
+
+// events: null = a carregar, Error = falha, array = dados
+function buildZonaCalendarCard(config, events) {
+  const src = config.calendarSource || {};
+  const card = document.createElement('div');
+  const tall = config.tall ? ' tall' : '';
+  const label = `<div class="zona-card-label">${escapeHtml(config.nome)}</div>`;
+  const now = new Date();
+
+  let msg = null;
+  if (!CALENDAR_PROXY_URL) msg = 'Calendário não configurado';
+  else if (events instanceof Error) msg = 'Sem ligação ao calendário';
+  else if (events == null) msg = 'A carregar…';
+
+  if (src.mode === 'current') {
+    let value = msg, sub = '';
+    if (!msg) {
+      // Na passagem de turno há 2 eventos em curso — mostra o que começou mais recentemente
+      const current = events.filter(ev => isCalOngoing(ev, now)).pop();
+      const next = current ? null : events[0];
+      if (current) {
+        value = current.title;
+        // Dia inteiro: o fim é exclusivo (00:00 do dia seguinte) → último dia = fim - 1ms
+        sub = current.allDay
+          ? `Até ${formatCalWhen({ start: new Date(current.end.getTime() - 1), allDay: true })}`
+          : `Até ${calTimeFmt.format(current.end)}`;
+      } else if (next) {
+        value = next.title;
+        sub = `Próximo · ${formatCalWhen(next)}`;
+      } else {
+        value = 'Sem eventos';
+      }
+    }
+    const hasValue = !msg && value !== 'Sem eventos';
+    card.className = `zona-card single ${hasValue ? 'going' : 'empty'}${tall}`;
+    card.innerHTML = `${label}
+      <div class="zona-card-single-value">${escapeHtml(value)}</div>
+      ${sub ? `<div class="zona-card-single-sub">${escapeHtml(sub)}</div>` : ''}`;
+    return card;
+  }
+
+  // mode: 'list'
+  const list = msg ? [] : events.slice(0, src.limit || 6);
+  card.className = `zona-card list ${list.length ? 'going' : 'empty'}${tall}`;
+  const itemsHtml = list.length
+    ? list.map(ev => `
+        <div class="zona-card-list-item cal-item${isCalOngoing(ev, now) ? ' active' : ''}">
+          <span class="cal-when">${escapeHtml(formatCalWhen(ev))}</span>
+          <span class="cal-title">${escapeHtml(ev.title)}</span>
+        </div>`).join('')
+    : `<div class="zona-card-list-empty">${escapeHtml(msg || 'Sem eventos')}</div>`;
+  card.innerHTML = `${label}<div class="zona-card-list-items">${itemsHtml}</div>`;
+  return card;
+}
+
 function renderZones(rowData) {
   zg.innerHTML = '';
   ZONA_CONFIGS.forEach(config => {
@@ -2457,7 +2703,9 @@ function renderZones(rowData) {
       const src = config.listSource || {};
       const cacheKey = src.mode === 'row-headers'
         ? `list|${src.tab}|rowheaders|${src.startColumn}-${src.endColumn}`
-        : `list|${src.tab}|${src.column || src.header}`;
+        : src.mode === 'objetivos'
+          ? `list|${src.sheetId}|gid${src.gid}|objetivos`
+          : `list|${src.tab}|${src.column || src.header}`;
       const cached = ZONA_LIST_CACHE[cacheKey];
       const card = buildZonaListCard(config, cached);
       zg.appendChild(card);
@@ -2470,6 +2718,23 @@ function renderZones(rowData) {
           applyActiveHighlight();
         })
         .catch(err => console.warn(`Falha a carregar lista para "${config.nome}":`, err));
+    } else if (config.type === 'calendar') {
+      const src = config.calendarSource || {};
+      const cacheKey = `cal|${src.cal}`;
+      const card = buildZonaCalendarCard(config, ZONA_LIST_CACHE[cacheKey] || null);
+      zg.appendChild(card);
+      if (!CALENDAR_PROXY_URL) return;
+
+      fetchCalendarEvents(src)
+        .then(events => {
+          ZONA_LIST_CACHE[cacheKey] = events;
+          card.replaceWith(buildZonaCalendarCard(config, events));
+        })
+        .catch(err => {
+          console.warn(`Falha a carregar calendário para "${config.nome}":`, err);
+          // Mantém os últimos dados bons, se existirem
+          if (!ZONA_LIST_CACHE[cacheKey]) card.replaceWith(buildZonaCalendarCard(config, err));
+        });
     } else if (config.type === 'single') {
       const src = config.singleSource || {};
       const cacheKey = `single|${src.tab}|${src.column || src.header}`;
@@ -2677,9 +2942,6 @@ function loadAndRenderPaises() {
 
     if (valid.length === 0) {
       setPaisEmpty();
-      if (typeof updateGlobeDestinations === 'function') {
-        updateGlobeDestinations([]);
-      }
       return;
     }
 
@@ -2692,17 +2954,32 @@ function loadAndRenderPaises() {
       setPaisGrid(valid);
     }
 
-    // Marcar todos os países no globo (Portugal mantém-se sempre como origem)
-    if (typeof updateGlobeDestinations === 'function') {
-      updateGlobeDestinations(valid.map(r => r.pais));
-    }
   }).catch(err => {
     console.warn('Falha a carregar países do montagemEditável:', err);
     setPaisEmpty();
-    if (typeof updateGlobeDestinations === 'function') {
-      updateGlobeDestinations([]);
-    }
   });
+}
+
+/* ── GLOBO: países da folha de Objetivos (coluna PAÍS), excepto STATUS "Finalizado" ── */
+const GLOBE_OBJ_SOURCE = { id: '1VAbosk2nuuzkSqgP5DTS0M3PBnV-Oep0XRGY-aOxjMo', gid: 0 };
+
+function loadGlobeObjetivos() {
+  return fetchSheetTable(GLOBE_OBJ_SOURCE).then(table => {
+    const rows = table && Array.isArray(table.rows) ? table.rows : [];
+    const paisIdx = findSheetCell(table, 'PAÍS', 'F');
+    const statusIdx = findSheetCell(table, 'STATUS', 'G');
+    const txt = (row, i) => {
+      const v = getValueFromRow(row, i);
+      return v == null ? '' : String(v).trim();
+    };
+    const isFinal = st => st.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'finalizado';
+    const paises = rows
+      .filter(row => !isFinal(txt(row, statusIdx)))
+      .map(row => txt(row, paisIdx))
+      .filter(Boolean);
+    paises.forEach(p => { if (!getCountryCoordinates(p)) console.warn(`Globo: país sem coordenadas — "${p}"`); });
+    if (typeof window.updateGlobeDestinations === 'function') window.updateGlobeDestinations(paises);
+  }).catch(err => console.warn('Falha a carregar países dos Objetivos para o globo:', err));
 }
 
 // Modelo/Lote (PS1!D2), Início (PS1!J2), Previsto (PS1!F2) e estado (PS1!A2).
@@ -2745,9 +3022,7 @@ function refreshPs1Details() {
     renderText(modelEl, modelo || MODEL_PLACEHOLDER, MODEL_PLACEHOLDER);
     loadAndRenderPaises();
     if (loteEl) {
-      loteEl.innerHTML = lote
-        ? `Lote &nbsp;·&nbsp; ${escapeHtml(lote)}`
-        : 'Sem Lote';
+      loteEl.textContent = 'Objetivo';
     }
     // Actualiza referência usada pelas listas para destacar o item activo
     currentModeloLote = (modelo && lote) ? `${modelo} - ${lote}` : null;
@@ -2763,7 +3038,7 @@ function refreshPs1Details() {
     updateDeadline(null, null);
     renderText(modelEl, MODEL_PLACEHOLDER, MODEL_PLACEHOLDER);
     if (loteEl) {
-      loteEl.innerHTML = 'Sem Lote';
+      loteEl.textContent = 'Objetivo';
     }
     updateStatus(null);
     currentModeloLote = null;
@@ -3020,9 +3295,14 @@ function initializeSheetWatcher() {
     SHEET_POLL_INTERVAL
   );
 
+  // Globo: países dos Objetivos (o globo é criado mais abaixo → 1ª leitura no próximo tick)
+  setTimeout(loadGlobeObjetivos, 0);
+  const globeObjTimer = setInterval(loadGlobeObjetivos, SHEET_POLL_INTERVAL);
+
   window.addEventListener('beforeunload', () => {
     stopPs1();
     stopPaises();
+    clearInterval(globeObjTimer);
   });
 }
 
