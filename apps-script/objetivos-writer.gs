@@ -102,14 +102,20 @@ function doPost(e) {
       }
     } else {
       const wanted = fmtId_(str(data.id));
+      let reuse = 0;
       if (wanted) {
         if (!validId_(wanted)) return json_({ ok: false, error: 'ID inválido.' });
-        if (findRow_(sh, wanted)) return json_({ ok: false, error: 'O ID #' + wanted + ' já existe.' });
+        const found = findRow_(sh, wanted);
+        // Linha com este ID mas sem objetivo (vazia) → reaproveita-a
+        if (found && String(sh.getRange(found, 2).getDisplayValue()).trim()) {
+          return json_({ ok: false, error: 'O ID #' + wanted + ' já existe.' });
+        }
+        reuse = found;
         id = wanted;
       } else {
         id = nextId_(sh);
       }
-      row = sh.getLastRow() + 1;
+      row = reuse || sh.getLastRow() + 1;
       status = statusIn || STATUS_OK[0];
       writeId_(sh, row, id);
     }
@@ -132,9 +138,38 @@ function fmtId_(v) {
 }
 function validId_(id) { return /^[A-Za-z0-9-]{1,12}$/.test(id) && norm_(id) !== '0'; }
 
+// A coluna ID é numérica com formato "0000" (o 7 aparece como 0007).
+// Tem de ficar número: o dashboard lê a Sheet pelo gviz, que descarta texto numa coluna de números.
 function writeId_(sh, row, id) {
-  sh.getRange(row, 1).setNumberFormat('@'); // mantém os zeros à esquerda ("0007")
-  sh.getRange(row, 1).setValue(id);
+  const cell = sh.getRange(row, 1);
+  if (/^\d+$/.test(id)) {
+    cell.setNumberFormat('0000');
+    cell.setValue(parseInt(id, 10));
+  } else {
+    cell.setNumberFormat('@');
+    cell.setValue(id);
+  }
+}
+
+// Executar UMA vez no editor (escolher "corrigirIds" na lista de funções → Executar):
+// converte IDs gravados como texto ("0007") em números com formato 0000.
+function corrigirIds() {
+  const sh = sheet_();
+  const last = sh.getLastRow();
+  if (last < 2) return;
+  const range = sh.getRange(2, 1, last - 1, 1);
+  const vals = range.getValues();
+  let n = 0;
+  vals.forEach((r, i) => {
+    const v = r[0];
+    if (typeof v === 'string' && /^\s*\d+\s*$/.test(v)) {
+      const cell = sh.getRange(i + 2, 1);
+      cell.setNumberFormat('0000');
+      cell.setValue(parseInt(v, 10));
+      n++;
+    }
+  });
+  Logger.log(n + ' ID(s) corrigido(s)');
 }
 
 function canonStatus_(v) {

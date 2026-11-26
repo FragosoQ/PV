@@ -2773,13 +2773,17 @@ async function fetchZonaListValues(source) {
       const meta = [modelo, txt(row, idx.quem), txt(row, idx.pais), prevTxt].filter(Boolean).join(' · ');
       return { id: fmtTicketId(txt(row, idx.id)), modelo, pais: txt(row, idx.pais), pedidoDate: parseObjDate(getValueFromRow(row, idx.pedido)), prevDate, evolucao: parseObjEvolucao(row, idx.evolucao), value, meta, status, dim: done, late };
     }).filter(Boolean);
-    // Pendentes primeiro (ordem da folha), concluídos no fim
-    items.sort((a, b) => Number(a.dim) - Number(b.dim));
     // Cartão principal: todos os tickets EM CURSO (ordem da folha);
-    // se não houver nenhum, mostra o primeiro da lista.
+    // se não houver nenhum, mostra o primeiro pendente.
     const emCurso = items.filter(it => objStatusClass(it.status) === ' st-curso');
-    renderTickets(emCurso.length ? emCurso : items.slice(0, 1));
-    return items.slice(0, Math.max(1, source.limit || 6));
+    const primeiro = items.find(it => !it.dim) || items[0];
+    renderTickets(emCurso.length ? emCurso : (primeiro ? [primeiro] : []));
+    // Lista: mais recentes primeiro (ID mais alto; sem ID numérico → posição na folha), concluídos no fim
+    const idNum = it => { const n = parseInt(String(it.id).replace(/\D/g, ''), 10); return isNaN(n) ? -1 : n; };
+    const list = items.map((it, i) => ({ it, i }))
+      .sort((a, b) => Number(a.it.dim) - Number(b.it.dim) || idNum(b.it) - idNum(a.it) || b.i - a.i)
+      .map(x => x.it);
+    return list.slice(0, Math.max(1, source.limit || 6));
   }
 
   if (source.mode === 'row-headers') {
