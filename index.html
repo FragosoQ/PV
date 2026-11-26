@@ -173,7 +173,8 @@ header {
 main {
   position: relative; z-index: 2;
   display: grid;
-  grid-template-columns: 1fr clamp(340px, 32vw, 475px);
+  /* painel direito: largura original + 10% da largura original do globo */
+  grid-template-columns: 1fr calc(clamp(340px, 32vw, 475px) * 0.95 + 5%);
   gap: 0;
   overflow: hidden;
   min-height: 0;
@@ -189,7 +190,8 @@ main {
 .left {
   display: grid;
   /* 2 colunas: globo (ocupa toda a altura) | identidade + zonas */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  /* globo -25% · identidade +15% (relativo à largura original do globo) */
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.15fr);
   grid-template-rows: minmax(0, 1fr) 1px auto;
   border-right: 1px solid rgba(255,255,255,0.12);
   min-height: 0;
@@ -3946,7 +3948,8 @@ updateTime(); setInterval(updateTime, 1000);
 
   const scene    = new THREE.Scene();
   const camera   = new THREE.PerspectiveCamera(45, W / H, 0.1, 2000);
-  camera.position.set(0, 30, 380);
+  // Globo 15% mais pequeno: afastar a câmara na proporção inversa (1 / 0.85)
+  camera.position.set(0, 30, 380).multiplyScalar(1 / 0.85);
   camera.lookAt(0, 0, 0);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
