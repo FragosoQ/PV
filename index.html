@@ -464,8 +464,9 @@ main {
 
 .zonas-grid {
   display: grid;
-  /* 2 colunas: Planeamento (-2%) | Histórico/Prox.Pri (+2%) */
-  grid-template-columns: 0.92fr 1.08fr;
+  /* 2 colunas: Planeamento | Suporte Técnico + Suporte 24h
+     coluna da direita -10% (1.08 → 0.972), diferença passada para Planeamento (0.92 → 1.028) */
+  grid-template-columns: 1.028fr 0.972fr;
   grid-auto-rows: 1fr;
   gap: clamp(10px, 1.6vh, 16px) clamp(14px, 2vw, 24px);
   flex: 1;
