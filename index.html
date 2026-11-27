@@ -965,11 +965,24 @@ body.is-multi .details-inner { display: none; }
   background: rgba(255,255,255,0.1);
 }
 .multi-prazo-bar { height: 100%; border-radius: 999px; }
-.multi-details-item { grid-template-columns: auto minmax(0, 1fr); }
+/* Datas por ticket — a lista ocupa a altura que sobra na .details-section
+   (altura fixada por JS) e o tamanho da letra escala para caberem todas as linhas. */
+.multi-details {
+  container-type: size;
+  flex: 1 1 0;
+  min-height: 0;
+  align-content: center;
+  --row-h: calc((100cqh - (var(--rows, 1) - 1) * clamp(4px, 0.8vh, 10px)) / var(--rows, 1));
+}
+.multi-details-item {
+  grid-template-columns: auto minmax(0, 1fr);
+  font-size: clamp(8px, min(calc(var(--row-h) * 0.62), calc(100cqw / var(--cols, 1) / 24)), 18px);
+  line-height: 1.15;
+}
 .multi-details-dates {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.multi-details-dates .d-k { margin-right: 0.3em; }
+.multi-details-dates .d-k { font-size: 0.8em; letter-spacing: 0.15em; margin-right: 0.3em; }
 
 /* ══════════════════════════════════════
    FOOTER
@@ -2585,6 +2598,7 @@ function renderMultiTickets(list, fmt) {
 
   if (detailsMultiEl) {
     detailsMultiEl.style.setProperty('--cols', cols2);
+    detailsMultiEl.style.setProperty('--rows', Math.ceil(shown.length / cols2));
     detailsMultiEl.innerHTML = shown.map(t => `<div class="multi-details-item">
         ${tid(t)}
         <span class="multi-details-dates">
