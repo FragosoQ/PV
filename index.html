@@ -4090,7 +4090,10 @@ updateTime(); setInterval(updateTime, 1000);
   const scene    = new THREE.Scene();
   const camera   = new THREE.PerspectiveCamera(45, W / H, 0.1, 2000);
   // Globo 15% mais pequeno: afastar a câmara na proporção inversa (1 / 0.85)
-  camera.position.set(0, 30, 380).multiplyScalar(1 / 0.85);
+  // + 2% mais pequeno: afastar mais (1 / 0.98)
+  // + 10% mais pequeno: 0.98 × 0.90 = 0.882
+  const GLOBE_SCALE = 0.882;
+  camera.position.set(0, 30, 380).multiplyScalar(1 / (0.85 * GLOBE_SCALE));
   camera.lookAt(0, 0, 0);
   const CAM_DIR  = camera.position.clone().normalize();
   const CAM_DIST = camera.position.length();
@@ -4106,7 +4109,7 @@ updateTime(); setInterval(updateTime, 1000);
   // Afasta a câmara quando a coluna é estreita, para o globo caber na largura
   // (o tamanho base continua a ser o definido por CAM_DIST quando há espaço).
   function fitCameraToWidth(w, h) {
-    const FIT_R  = RADIUS * 1.08;                       // globo + margem para o brilho
+    const FIT_R  = RADIUS * 1.08 / GLOBE_SCALE;         // globo + margem para o brilho (-2%)
     const halfV  = THREE.MathUtils.degToRad(camera.fov / 2);
     const halfH  = Math.atan(Math.tan(halfV) * (w / h));
     const needed = FIT_R / Math.sin(Math.min(halfH, halfV));
