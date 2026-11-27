@@ -190,8 +190,9 @@ main {
 .left {
   display: grid;
   /* 2 colunas: globo (ocupa toda a altura) | identidade + zonas */
-  /* coluna central -10% (1.15 → 1.035), diferença passada para a coluna do globo (0.75 → 0.865) */
-  grid-template-columns: minmax(0, 0.865fr) minmax(0, 1.035fr);
+  /* coluna central -10% (1.15 → 1.035), diferença passada para a coluna do globo (0.75 → 0.865)
+     coluna central -5% (1.035 → 0.98325), diferença passada para a coluna do globo (0.865 → 0.91675) */
+  grid-template-columns: minmax(0, 0.91675fr) minmax(0, 0.98325fr);
   grid-template-rows: minmax(0, 1fr) 1px auto;
   border-right: 1px solid rgba(255,255,255,0.12);
   min-height: 0;
