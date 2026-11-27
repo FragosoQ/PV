@@ -358,7 +358,15 @@ main {
 }
 .id-tickets[data-layout="grid"] .ticket-row {
   flex-direction: column;
+  align-items: stretch; /* baseline em coluna deixa os filhos com a largura do conteúdo → sobreposição */
   gap: 2px;
+  overflow: hidden;
+}
+.id-tickets[data-layout="grid"] .id-ticket {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .ticket-row.ticket-more {
   justify-content: center;
